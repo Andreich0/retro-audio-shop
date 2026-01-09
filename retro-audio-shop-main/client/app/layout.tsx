@@ -1,38 +1,42 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { CartProvider } from "../context/CartContext"; // <--- Импортираме контекста
-import Link from "next/link"; // За навигацията
+import { Rajdhani } from "next/font/google";
+import "./globals.css";
+import Navbar from "./components/Navbar";
 
-const inter = Inter({ subsets: ["latin"] });
+// 1. Импортираме CartProvider (провери пътя, ако даде грешка!)
+import { CartProvider } from "../context/CartContext"; 
+
+const rajdhani = Rajdhani({ 
+  subsets: ["latin"], 
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-rajdhani",
+});
 
 export const metadata: Metadata = {
   title: "Retro Audio Shop",
-  description: "Магазин за касети и декове",
+  description: "Най-доброто винтидж аудио оборудване.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <CartProvider> {/* <--- ОПАКОВАМЕ ВСИЧКО ТУК */}
+    <html lang="bg">
+      <body className={`${rajdhani.className} bg-gray-950 text-gray-100 antialiased selection:bg-orange-500 selection:text-white`}>
+        
+        {/* 2. Обвиваме ВСИЧКО с CartProvider */}
+        <CartProvider>
           
-          {/* Добавяме и проста Навигация, за да е удобно */}
-          <nav className="bg-gray-800 p-4 border-b border-gray-700 text-white flex justify-between items-center sticky top-0 z-50">
-            <Link href="/" className="text-xl font-bold text-orange-500">RetroAudio</Link>
-            <div className="flex gap-4">
-              <Link href="/shop" className="hover:text-orange-400">Каталог</Link>
-              <Link href="/cart" className="hover:text-orange-400 font-bold">🛒 Количка</Link>
-              <Link href="/dashboard" className="hover:text-orange-400">Профил</Link>
-            </div>
-          </nav>
+          <Navbar />
 
-          {children}
+          <main className="min-h-screen">
+            {children}
+          </main>
+          
         </CartProvider>
+
       </body>
     </html>
   );

@@ -1,3 +1,6 @@
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require('bcrypt');
 const authorization = require("./middleware/authorization");
 const jwt = require('jsonwebtoken');
@@ -11,6 +14,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+// Позволяваме достъп до снимките през браузъра
+app.use("/uploads", express.static("uploads"));
 
 // ТЕСТОВ МАРШРУТ С БАЗА ДАННИ
 app.get('/', async (req, res) => {
@@ -183,8 +188,128 @@ app.post("/orders", authorization, async (req, res) => {
   }
 });
 
+// ВЗИМАНЕ НА МОИТЕ ПОРЪЧКИ
+app.get("/orders/mine", authorization, async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
 
+    // Взимаме поръчките, подредени от най-новата към най-старата
+    const orders = await pool.query(
+      "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC",
+      [user_id]
+    );
 
+    res.json(orders.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// ДОБАВЯНЕ НА ПРОДУКТ (САМО ЗА АДМИНИ)
+app.post("/products", authorization, async (req, res) => {
+  try {
+    const { name, description, price, category, image_url, stock } = req.body;
+    
+    // 1. Първо проверяваме дали потребителят е Админ
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    
+    if (user.rows[0].role !== 'admin') {
+      return res.status(403).json("Нямате права да добавяте продукти!");
+    }
+
+    // 2. Ако е админ, добавяме продукта
+    const newProduct = await pool.query(
+      "INSERT INTO products (name, description, price, category, image_url, stock) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [name, description, price, category, image_url, stock]
+    );
+
+    res.json(newProduct.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// --- КОНФИГУРАЦИЯ ЗА КАЧВАНЕ НА СНИМКИ ---
+
+// 1. Проверяваме дали папката съществува, ако не - я създаваме
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads"); // Сега вече сме сигурни, че папката я има
+  },
+  filename: (req, file, cb) => {
+    // Правим уникално име и махаме интервалите, за да няма проблеми с линка
+    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, uniqueName + ext);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// 2. Маршрут за качване
+// Този маршрут приема файл с име "image" и връща линка към него
+app.post("/upload", upload.single("image"), (req, res) => {
+  try {
+    // Връщаме пълния адрес на снимката
+    const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    res.json({ url: imageUrl });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Грешка при качване");
+  }
+});
+
+// 1. РЕДАКТИРАНЕ НА ПРОДУКТ (PUT)
+app.put("/products/:id", authorization, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, price, category, image_url, stock } = req.body;
+
+    // Проверка дали е админ
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin') {
+      return res.status(403).json("Нямате права!");
+    }
+
+    // Обновяване
+    const updateProduct = await pool.query(
+      "UPDATE products SET name = $1, description = $2, price = $3, category = $4, image_url = $5, stock = $6 WHERE product_id = $7 RETURNING *",
+      [name, description, price, category, image_url, stock, id]
+    );
+
+    res.json(updateProduct.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// 2. ИЗТРИВАНЕ НА ПРОДУКТ (DELETE)
+app.delete("/products/:id", authorization, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Проверка дали е админ
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin') {
+      return res.status(403).json("Нямате права!");
+    }
+
+    // Изтриване
+    await pool.query("DELETE FROM products WHERE product_id = $1", [id]);
+    res.json("Продуктът беше изтрит!");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 
 
