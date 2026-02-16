@@ -313,14 +313,16 @@ app.post("/upload", upload.single("image"), (req, res) => {
   }
 });
 
-// ДОБАВЯНЕ НА ПРОДУКТ (САМО АДМИН)
+// ДОБАВЯНЕ НА ПРОДУКТ (ADMIN + SUPERADMIN)
 app.post("/products", authorization, async (req, res) => {
   try {
     // Взимаме condition от body
     const { name, description, price, category, image_url, stock, condition } = req.body;
     
     const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
-    if (user.rows[0].role !== 'admin') {
+    
+    // --- ПРОМЯНА: ПУСКАМЕ И ДВАТА АДМИНА ---
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') {
       return res.status(403).json("Нямате права!");
     }
 
@@ -337,7 +339,7 @@ app.post("/products", authorization, async (req, res) => {
   }
 });
 
-// РЕДАКТИРАНЕ НА ПРОДУКТ (САМО АДМИН)
+// РЕДАКТИРАНЕ НА ПРОДУКТ (ADMIN + SUPERADMIN)
 app.put("/products/:id", authorization, async (req, res) => {
   try {
     const { id } = req.params;
@@ -345,7 +347,9 @@ app.put("/products/:id", authorization, async (req, res) => {
     const { name, description, price, category, image_url, stock, condition } = req.body;
 
     const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
-    if (user.rows[0].role !== 'admin') {
+    
+    // --- ПРОМЯНА: ПУСКАМЕ И ДВАТА АДМИНА ---
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') {
       return res.status(403).json("Нямате права!");
     }
 
@@ -371,13 +375,15 @@ app.put("/products/:id", authorization, async (req, res) => {
   }
 });
 
-// ИЗТРИВАНЕ НА ПРОДУКТ (САМО АДМИН)
+// ИЗТРИВАНЕ НА ПРОДУКТ (ADMIN + SUPERADMIN)
 app.delete("/products/:id", authorization, async (req, res) => {
   try {
     const { id } = req.params;
 
     const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
-    if (user.rows[0].role !== 'admin') {
+    
+    // --- ПРОМЯНА: ПУСКАМЕ И ДВАТА АДМИНА ---
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') {
       return res.status(403).json("Нямате права!");
     }
 
@@ -389,11 +395,13 @@ app.delete("/products/:id", authorization, async (req, res) => {
   }
 });
 
-// --- АДМИН: ВЗИМАНЕ НА ВСИЧКИ ПОРЪЧКИ ---
+// --- АДМИН: ВЗИМАНЕ НА ВСИЧКИ ПОРЪЧКИ (ADMIN + SUPERADMIN) ---
 app.get("/admin/orders", authorization, async (req, res) => {
   try {
     const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
-    if (user.rows[0].role !== 'admin') {
+    
+    // --- ПРОМЯНА: ПУСКАМЕ И ДВАТА АДМИНА ---
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') {
       return res.status(403).json("Нямате права!");
     }
 
@@ -411,20 +419,120 @@ app.get("/admin/orders", authorization, async (req, res) => {
   }
 });
 
-// --- АДМИН: ПРОМЯНА НА СТАТУС ---
+// --- АДМИН: ПРОМЯНА НА СТАТУС (ADMIN + SUPERADMIN) ---
 app.put("/admin/orders/:id/status", authorization, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body; 
 
     const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
-    if (user.rows[0].role !== 'admin') {
+    
+    // --- ПРОМЯНА: ПУСКАМЕ И ДВАТА АДМИНА ---
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') {
       return res.status(403).json("Нямате права!");
     }
 
     await pool.query("UPDATE orders SET status = $1 WHERE order_id = $2", [status, id]);
 
     res.json("Статусът е обновен успешно!");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// ==========================================
+//              5. УПРАВЛЕНИЕ НА ПОТРЕБИТЕЛИ (АДМИН)
+// ==========================================
+
+// ВЗИМАНЕ НА ВСИЧКИ ПОТРЕБИТЕЛИ (ADMIN + SUPERADMIN)
+app.get("/admin/users", authorization, async (req, res) => {
+  try {
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    
+    // --- ПРОМЯНА: ПУСКАМЕ И ДВАТА АДМИНА ---
+    if (requester.rows[0].role !== 'admin' && requester.rows[0].role !== 'superadmin') {
+      return res.status(403).json("Нямате права!");
+    }
+
+    // Взимаме списък с потребители (без паролите!)
+    const users = await pool.query("SELECT user_id, first_name, last_name, email, role, created_at FROM users ORDER BY created_at DESC");
+    res.json(users.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// ИЗТРИВАНЕ НА ПОТРЕБИТЕЛ (САМО SUPERADMIN)
+app.delete("/admin/users/:id", authorization, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    
+    // --- САМО SUPERADMIN МОЖЕ ДА ТРИЕ ХОРА ---
+    if (requester.rows[0].role !== 'superadmin') {
+      return res.status(403).json("Само Супер Администратор може да трие потребители!");
+    }
+
+    if (id === req.user.user_id) {
+        return res.status(400).json("Не можете да изтриете собствения си акаунт!");
+    }
+
+    await pool.query("DELETE FROM users WHERE user_id = $1", [id]);
+    res.json("Потребителят беше изтрит!");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// ПРОМЯНА НА РОЛЯ (САМО SUPERADMIN)
+app.put("/admin/users/:id/role", authorization, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    
+    // --- САМО SUPERADMIN ---
+    if (requester.rows[0].role !== 'superadmin') {
+      return res.status(403).json("Само Супер Администратор може да променя роли!");
+    }
+
+    if (id === req.user.user_id) {
+        return res.status(400).json("Не можете да променяте собствената си роля!");
+    }
+
+    await pool.query("UPDATE users SET role = $1 WHERE user_id = $2", [role, id]);
+    res.json("Ролята е обновена успешно!");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// АДМИНИСТРАТИВНА СМЯНА НА ПАРОЛА (ADMIN + SUPERADMIN)
+app.put("/admin/users/:id/password", authorization, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body; // Админът въвежда новата парола
+
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    
+    // --- И ДВАТА АДМИНА МОГАТ ДА РЕСЕТВАТ ПАРОЛИ ---
+    if (requester.rows[0].role !== 'admin' && requester.rows[0].role !== 'superadmin') {
+      return res.status(403).json("Нямате права!");
+    }
+
+    const saltRound = 10;
+    const salt = await bcrypt.genSalt(saltRound);
+    const bcryptPassword = await bcrypt.hash(newPassword, salt);
+
+    await pool.query("UPDATE users SET password = $1 WHERE user_id = $2", [bcryptPassword, id]);
+    
+    res.json("Паролата е сменена успешно!");
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
