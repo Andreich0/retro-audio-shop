@@ -1750,7 +1750,7 @@ function Dashboard() {
         columnNumber: 5
     }, this);
 }
-_s(Dashboard, "3hjt7yRo8tDqJEtk/WJPsVJI/Jw=", false, function() {
+_s(Dashboard, "fzZvQUEfWVmybGtnNPR9b7n1uak=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];

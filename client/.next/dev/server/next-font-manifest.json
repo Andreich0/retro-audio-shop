@@ -4,39 +4,7 @@
       "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
       "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
     ],
-    "[project]/client/app/admin/orders/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/admin/products/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/admin/users/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/cart/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/checkout/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/checkout/success/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/contact/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
     "[project]/client/app/dashboard/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/forgot-password/page": [
       "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
       "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
     ],
@@ -48,27 +16,7 @@
       "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
       "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
     ],
-    "[project]/client/app/privacy/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/register/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/reset-password/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/shop/[id]/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
     "[project]/client/app/shop/page": [
-      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
-      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
-    ],
-    "[project]/client/app/terms/page": [
       "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
       "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
     ],
