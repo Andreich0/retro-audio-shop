@@ -30,7 +30,8 @@ export default function Home() {
 
   useEffect(() => {
     // Взимаме 4 продукта
-    fetch("http://localhost:5000/products")
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    fetch(`${API_URL}/products`)
       .then((res) => res.json())
       .then((data) => setFeaturedProducts(data.slice(0, 4)))
       .catch((err) => console.error(err));

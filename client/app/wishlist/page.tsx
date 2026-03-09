@@ -15,6 +15,8 @@ interface Product {
   condition?: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 const conditionDisplayMap: { [key: string]: string } = {
   "new": "НОВ",
   "mint": "КАТО НОВ",
@@ -36,7 +38,7 @@ export default function WishlistPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/wishlist", {
+      const res = await fetch(`${API_URL}/wishlist`, {
         headers: { token }
       });
       const data = await res.json();
@@ -56,7 +58,7 @@ export default function WishlistPage() {
     e.preventDefault(); // Спира линка към продукта
     try {
       const token = localStorage.getItem("token");
-      await fetch("http://localhost:5000/wishlist/toggle", {
+      await fetch(`${API_URL}/wishlist/toggle`, {
         method: "POST",
         headers: { "Content-Type": "application/json", token: token || "" },
         body: JSON.stringify({ product_id: productId })

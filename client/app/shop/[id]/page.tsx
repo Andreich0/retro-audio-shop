@@ -25,6 +25,8 @@ const conditionMap: { [key: string]: string } = {
   "parts": "За части"
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 export default function ProductPage() {
   const params = useParams();
   const id = params?.id;
@@ -43,7 +45,7 @@ export default function ProductPage() {
     const fetchData = async () => {
       try {
         // 1. Взимаме основния продукт
-        const res = await fetch(`http://localhost:5000/products/${id}`);
+        const res = await fetch(`${API_URL}/products/${id}`);
         if (!res.ok) throw new Error(`Грешка при зареждане: ${res.status}`);
         
         const data = await res.json();
@@ -51,7 +53,7 @@ export default function ProductPage() {
         setProduct(mainProduct);
 
         // 2. Взимаме всички продукти за "Сходни"
-        const allRes = await fetch("http://localhost:5000/products");
+        const allRes = await fetch(`${API_URL}/products`);
         if (allRes.ok) {
             const allData = await allRes.json();
             // Филтрираме същата категория, махаме текущия продукт и взимаме макс 3
