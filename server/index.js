@@ -21,7 +21,7 @@ app.listen(PORT, () => {
 app.use(cors({
   origin: [
     "http://localhost:3000", 
-    "https://retro-audio-shop.vercel.app" // Твоят точен линк от Vercel!
+    "https://retro-audio-shop.vercel.app"
   ],
   credentials: true
 }));
