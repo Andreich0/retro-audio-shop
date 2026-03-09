@@ -6,6 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext"; 
 import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart } from "lucide-react";
 
+// ВЗИМАМЕ URL АДРЕСА НА API-ТО ОТ ПРОМЕНЛИВИТЕ НА СРЕДАТА
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface Product {
   product_id: number;
   name: string;
@@ -63,18 +66,16 @@ const ShopContent = () => {
   const [isSortOpen, setIsSortOpen] = useState(false); 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // --- WISHLIST STATE ---
   const [wishlist, setWishlist] = useState<number[]>([]);
 
   const { addToCart } = useCart(); 
   const searchParams = useSearchParams();
 
-  // ВЗИМАНЕ НА ПРОДУКТИ И ЛЮБИМИ
   useEffect(() => {
     const fetchProductsAndWishlist = async () => {
       try {
-        // 1. Взимаме продуктите
-        const response = await fetch("http://localhost:5000/products");
+        // 1. ЗАМЕНЕНО: Използваме API_URL променливата
+        const response = await fetch(`${API_URL}/products`);
         const data = await response.json();
         setProducts(data);
         setFilteredProducts(data);
@@ -85,10 +86,10 @@ const ShopContent = () => {
             setMaxPrice(highestPrice);
         }
 
-        // 2. Взимаме любимите на потребителя (ако е логнат)
         const token = localStorage.getItem("token");
         if (token) {
-            const wlRes = await fetch("http://localhost:5000/wishlist", { headers: { token } });
+            // 2. ЗАМЕНЕНО: Използваме API_URL променливата
+            const wlRes = await fetch(`${API_URL}/wishlist`, { headers: { token } });
             if (wlRes.ok) {
                 const wlData = await wlRes.json();
                 setWishlist(wlData.map((item: any) => item.product_id));
@@ -97,7 +98,7 @@ const ShopContent = () => {
 
         setLoading(false);
       } catch (err) {
-        console.error(err);
+        console.error("Fetch error:", err);
         setLoading(false);
       }
     };
@@ -118,7 +119,6 @@ const ShopContent = () => {
     }
   }, [searchParams]);
 
-  // --- ЛОГИКА ЗА ФИЛТРИРАНЕ И СОРТИРАНЕ ---
   useEffect(() => {
     let result = [...products];
 
@@ -163,9 +163,8 @@ const ShopContent = () => {
     setSelectedConditions(prev => prev.includes(condId) ? prev.filter(c => c !== condId) : [...prev, condId]);
   };
 
-  // --- TOGGLE WISHLIST ---
   const toggleWishlist = async (e: React.MouseEvent, productId: number) => {
-      e.preventDefault(); // Спираме отварянето на линка към детайлната страница
+      e.preventDefault();
       const token = localStorage.getItem("token");
       
       if (!token) {
@@ -174,7 +173,8 @@ const ShopContent = () => {
       }
 
       try {
-          const res = await fetch("http://localhost:5000/wishlist/toggle", {
+          // 3. ЗАМЕНЕНО: Използваме API_URL променливата
+          const res = await fetch(`${API_URL}/wishlist/toggle`, {
               method: "POST",
               headers: { "Content-Type": "application/json", token },
               body: JSON.stringify({ product_id: productId })
@@ -191,7 +191,6 @@ const ShopContent = () => {
       }
   };
 
-  // --- ЛОГИКА ЗА ЦЕНАТА И СЛАЙДЪРА ---
   const handleMinSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.min(Number(e.target.value), (Number(maxPrice) || priceLimit) - 1);
     setMinPrice(value);
@@ -228,6 +227,7 @@ const ShopContent = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#ff6b00] selection:text-black">
       
+      {/* HEADER SECTION */}
       <div className="relative bg-[#0f0f13] border-b border-[#ff6b00] py-12 px-4 overflow-hidden z-10">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-500 via-[#0a0a0a] to-[#0a0a0a]"></div>
         <div className="max-w-7xl mx-auto text-center relative z-10">
@@ -239,6 +239,7 @@ const ShopContent = () => {
 
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
         
+        {/* MOBILE FILTERS BUTTON */}
         <div className="lg:hidden mb-6 flex gap-4">
             <button 
                 onClick={() => setIsMobileFilterOpen(true)}
@@ -250,18 +251,19 @@ const ShopContent = () => {
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
             
+            {/* SIDEBAR / FILTERS */}
             <aside className={`
                 fixed inset-0 z-40 bg-[#0a0a0a]/95 backdrop-blur-md p-6 lg:static lg:bg-transparent lg:p-0 lg:w-1/4 lg:block lg:z-0
                 transition-transform duration-300 ease-in-out overflow-y-auto lg:overflow-visible lg:sticky lg:top-24
                 ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `}>
                 <div className="space-y-6">
-                    
                     <div className="flex justify-between items-center lg:hidden mb-6 border-b border-[#333] pb-4">
                         <span className="text-xl font-black uppercase text-[#ff6b00]">Филтри</span>
                         <button onClick={() => setIsMobileFilterOpen(false)}><X size={24} /></button>
                     </div>
 
+                    {/* SEARCH */}
                     <div className="bg-[#18181b] p-5 rounded-xl border border-[#333]">
                         <h3 className="text-xs font-bold uppercase text-gray-500 mb-3 tracking-widest">Търсене</h3>
                         <div className="relative">
@@ -276,6 +278,7 @@ const ShopContent = () => {
                         </div>
                     </div>
 
+                    {/* CATEGORIES */}
                     <div className="bg-[#18181b] p-5 rounded-xl border border-[#333]">
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="text-xs font-bold uppercase text-gray-500 tracking-widest">Категории</h3>
@@ -299,6 +302,7 @@ const ShopContent = () => {
                         </div>
                     </div>
 
+                    {/* CONDITION */}
                     <div className="bg-[#18181b] p-5 rounded-xl border border-[#333]">
                         <div className="flex justify-between items-center mb-3">
                              <h3 className="text-xs font-bold uppercase text-gray-500 tracking-widest">Състояние</h3>
@@ -322,9 +326,9 @@ const ShopContent = () => {
                         </div>
                     </div>
 
+                    {/* PRICE RANGE */}
                     <div className="bg-[#18181b] p-5 rounded-xl border border-[#333]">
                         <h3 className="text-xs font-bold uppercase text-gray-500 mb-6 tracking-widest">Цена (€)</h3>
-                        
                         <div className="relative w-full h-1 bg-gray-700 rounded-lg mb-8 mt-2">
                             <div 
                                 className="absolute h-full bg-[#ff6b00] rounded-lg z-10 transition-all duration-75"
@@ -366,13 +370,11 @@ const ShopContent = () => {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </aside>
 
+            {/* MAIN CONTENT AREA */}
             <main className="lg:w-3/4 w-full">
-                
-                {/* ДОБАВЯМЕ relative z-50 НА ТОЗИ КОНТЕЙНЕР, ЗА ДА Е НАД ВСИЧКО */}
                 <div className="relative z-50 flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-[#333] gap-4">
                     <div>
                         <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">
@@ -393,7 +395,6 @@ const ShopContent = () => {
                             Намерени: <span className="text-[#ff6b00] font-bold">{filteredProducts.length}</span>
                         </span>
 
-                        {/* ТУК ПРОМЕНЯМЕ ОТ z-30 НА z-50 */}
                         <div className="relative z-50 w-full sm:w-auto">
                             <button 
                                 onClick={() => setIsSortOpen(!isSortOpen)}
@@ -458,14 +459,12 @@ const ShopContent = () => {
                         {filteredProducts.map((product) => (
                        <div 
                             key={product.product_id} 
-                            // 1. МАХНАХМЕ grayscale и opacity-80 от тук!
                             className={`group bg-[#18181b] border border-[#333] rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-full ${product.stock === 0 ? 'border-gray-800' : 'hover:border-[#ff6b00] hover:shadow-[0_0_20px_rgba(255,107,0,0.1)]'}`}
                         >
                             <Link href={`/shop/${product.product_id}`} className="block relative h-60 bg-white p-4 overflow-hidden group/img">
                                 <img
                                     src={product.image_url || "/placeholder.jpg"}
                                     alt={product.name}
-                                    // 2. СЛОЖИХМЕ grayscale САМО на снимката
                                     className={`w-full h-full object-contain transition duration-500 ${product.stock > 0 ? 'group-hover/img:scale-105' : 'grayscale opacity-70'}`}
                                 />
 
@@ -477,7 +476,6 @@ const ShopContent = () => {
                                     </div>
                                 )}
 
-                                {/* БУТОН СЪРЦЕ - Вече нищо не му убива цвета! */}
                                 <button
                                     onClick={(e) => toggleWishlist(e, product.product_id)}
                                     className={`absolute top-3 right-3 p-2 rounded-full transition-all z-30 shadow-[0_2px_10px_rgba(0,0,0,0.5)] backdrop-blur-md border ${
@@ -497,7 +495,6 @@ const ShopContent = () => {
                                 </button>
                             </Link>
 
-                            {/* 3. СЛОЖИХМЕ grayscale на долната част с текста, за да стои "изгасена" */}
                             <div className={`p-5 flex flex-col flex-grow bg-[#18181b] ${product.stock === 0 ? 'grayscale opacity-60' : ''}`}>
                                 <div className="flex gap-2 mb-3">
                                     <span className="text-[#ff6b00] text-[9px] font-bold uppercase tracking-widest bg-[#ff6b00]/10 px-2 py-0.5 rounded">
