@@ -1,0 +1,11 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/client/app/checkout/success/page": [
+      "static/media/9ee96739b121ce9a-s.p.387f1507.woff2",
+      "static/media/a056574f751321d1-s.p.3ffdf00b.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}
