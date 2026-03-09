@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #ff6b00;
+  --bg-dark: #0a0a0a;
+}
+
+body {
+  /* Прилагаме новия шрифт Jura глобално */
+  font-family: var(--font-jura), system-ui, sans-serif;
+  background-color: var(--bg-dark);
+  color: #e5e5e5;
+  
+  /* Jura е леко сбит, затова увеличаваме разстоянието и размера */
+  letter-spacing: 0.03em;
+  font-size: 16px; 
+}
+
+/* Всички заглавия да са "Техно" стил */
+h1, h2, h3, h4, h5, h6 {
+  text-transform: uppercase;
+  font-weight: 700; /* Bold */
+  letter-spacing: 0.05em; /* Повече въздух */
+}
+
+/* === РЕТРО СКРОЛБАР === */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+  border-left: 1px solid #222;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6b00; /* Оранжево при ховър */
+  box-shadow: 0 0 10px #ff6b00; /* Светещ ефект */
+}
+
+/* === СЕЛЕКЦИЯ НА ТЕКСТ === */
+::selection {
+  background: #ff6b00;
+  color: #000;
+  text-shadow: none;
+}
