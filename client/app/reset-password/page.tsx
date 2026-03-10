@@ -44,7 +44,7 @@ function ResetPasswordContent() {
     setStatus({ type: "loading", text: "" });
 
     try {
-      const res = await fetch("http://localhost:5000/auth/reset-password", {
+      const res = await fetch("http://retro-audio-api-o7it.onrender.com/auth/reset-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: passwords.newPassword })

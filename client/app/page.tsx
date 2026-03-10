@@ -6,7 +6,7 @@ import { useCart } from "../context/CartContext";
 import { Eye, ShoppingCart, PackageX, Heart } from "lucide-react";
 
 // Дефинираме API_URL в началото
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://retro-audio-api-o7it.onrender.com";
 
 interface Product {
   product_id: number;

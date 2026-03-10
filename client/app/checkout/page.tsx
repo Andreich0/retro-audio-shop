@@ -23,7 +23,7 @@ export default function CheckoutPage() {
     const orderId = params.get("orderId");
 
     if (canceled === "true" && orderId) {
-      fetch(`http://localhost:5000/orders/${orderId}/cancel`, { method: "DELETE" })
+      fetch(`http://retro-audio-api-o7it.onrender.com/orders/${orderId}/cancel`, { method: "DELETE" })
         .then(() => {
           alert("Плащането беше прекъснато. Поръчката не е завършена.");
           // Изчистваме URL адреса, за да не се показва ?canceled=true
@@ -36,7 +36,7 @@ export default function CheckoutPage() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:5000/auth/verify", { headers: { token: token } })
+    fetch("http://retro-audio-api-o7it.onrender.com/auth/verify", { headers: { token: token } })
       .then(res => res.ok ? res.json() : null)
       .then(userData => {
         if (userData) {
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const resOrder = await fetch("http://localhost:5000/orders", {
+      const resOrder = await fetch("http://retro-audio-api-o7it.onrender.com/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json", "token": token || "" },
         body: JSON.stringify(orderData),
@@ -81,7 +81,7 @@ export default function CheckoutPage() {
 
       if (formData.paymentMethod === 'card') {
         // За Stripe: НЕ изчистваме количката още! Само пренасочваме.
-        const resStripe = await fetch("http://localhost:5000/create-checkout-session", {
+        const resStripe = await fetch("http://retro-audio-api-o7it.onrender.com/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: cart, orderId: orderResponse.orderId }),

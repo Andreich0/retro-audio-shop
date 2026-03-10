@@ -603,7 +603,7 @@ const upload = multer({ storage: storage });
 
 app.post("/upload", upload.single("image"), (req, res) => {
   try {
-    const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    const imageUrl = `http://retro-audio-api-o7it.onrender.com/uploads/${req.file.filename}`;
     res.json({ url: imageUrl });
   } catch (err) {
     console.error(err);
