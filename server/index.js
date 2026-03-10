@@ -29,25 +29,16 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // ==========================================
-//              NODEMAILER (КОРИГИРАН ЗА ОБЛАКА)
+//              NODEMAILER (КОРИГИРАН)
 // ==========================================
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
-  secure: true, // Задължително за порт 465
+  secure: true, 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-});
-
-// Проверка на връзката с имейл сървъра при старт
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("❌ Грешка при Nodemailer конфигурацията:", error);
-  } else {
-    console.log("✅ Имейл сървърът е готов за работа!");
-  }
 });
 
 // ПОМОЩНА ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА
@@ -105,9 +96,8 @@ const sendOrderConfirmationEmails = async (orderId) => {
                <p>Влез в Админ панела за повече детайли.</p>`
     });
 
-    console.log(`✅ Имейлите за поръчка #${orderId} са изпратени успешно!`);
   } catch (err) {
-    console.error("❌ Грешка при изпращане на имейли за поръчка:", err);
+    console.error("Грешка при изпращане на имейли:", err);
   }
 };
 
@@ -151,6 +141,7 @@ app.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
     if (user.rows.length === 0) return res.status(401).json({ message: "Грешен имейл или парола!" });
 
     const validPassword = await bcrypt.compare(password, user.rows[0].password);
@@ -315,12 +306,12 @@ app.put("/orders/:id/success", async (req, res) => {
     try {
       const { id } = req.params;
       const orderCheck = await pool.query("SELECT status FROM orders WHERE order_id = $1", [id]);
-      if (orderCheck.rows.length === 0) return res.status(404).json("Не е намерена.");
-      if (orderCheck.rows[0].status !== 'awaiting_payment') return res.json("Вече е платена.");
+      if (orderCheck.rows.length === 0) return res.status(404).json("Поръчката не е намерена.");
+      if (orderCheck.rows[0].status !== 'awaiting_payment') return res.json("Поръчката вече е потвърдена.");
       
       await pool.query("UPDATE orders SET status = 'new' WHERE order_id = $1", [id]);
       sendOrderConfirmationEmails(id);
-      res.json("Успех!");
+      res.json("Плащането е успешно отразено!");
     } catch (err) {
       console.error(err);
       res.status(500).send("Server Error");
@@ -367,11 +358,11 @@ app.post("/create-checkout-session", async (req, res) => {
     res.json({ url: session.url });
   } catch (err) {
     console.error("Stripe Error:", err.message);
-    res.status(500).json({ error: "Грешка при Stripe" });
+    res.status(500).json({ error: "Грешка при Stripe плащане" });
   }
 });
 
-// ПОВТОРНО ПЛАЩАНЕ
+// --- ПОВТОРНО ПЛАЩАНЕ ---
 app.post("/orders/:id/retry-payment", authorization, async (req, res) => {
   try {
     const { id } = req.params;
@@ -407,7 +398,7 @@ app.delete("/orders/:id/cancel", async (req, res) => {
     await pool.query("DELETE FROM order_items WHERE order_id = $1", [id]);
     await pool.query("DELETE FROM orders WHERE order_id = $1", [id]);
     await pool.query("COMMIT");
-    res.json("Успешно анулирана.");
+    res.json("Поръчката е анулирана успешно.");
   } catch (err) {
     await pool.query("ROLLBACK");
     res.status(500).send("Server Error");
@@ -415,7 +406,7 @@ app.delete("/orders/:id/cancel", async (req, res) => {
 });
 
 // ==========================================
-//              4. АДМИН & СНИМКИ
+//              4. АДМИН ПАНЕЛ & СНИМКИ
 // ==========================================
 
 const storage = multer.diskStorage({
@@ -428,7 +419,6 @@ const upload = multer({ storage });
 
 app.post("/upload", upload.single("image"), (req, res) => {
   try {
-    // ВРЪЩАМЕ HTTPS ЛИНК КЪМ RENDER
     res.json({ url: `https://retro-audio-api-o7it.onrender.com/uploads/${req.file.filename}` });
   } catch (err) { res.status(500).send("Грешка при качване"); }
 });
@@ -436,28 +426,40 @@ app.post("/upload", upload.single("image"), (req, res) => {
 app.post("/products", authorization, async (req, res) => {
   try {
     const { name, description, price, category, image_url, stock, condition } = req.body;
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     await pool.query("INSERT INTO products (name, description, price, category, image_url, stock, condition) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [name, description, price, category, image_url, stock, condition || 'good']);
-    res.json("Продуктът е добавен!");
+    res.json("Продуктът беше добавен успешно!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
 app.put("/products/:id", authorization, async (req, res) => {
   try {
     const { name, description, price, category, image_url, stock, condition } = req.body;
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     await pool.query("UPDATE products SET name = $1, description = $2, price = $3, category = $4, image_url = $5, stock = $6, condition = $7 WHERE product_id = $8", [name, description, price, category, image_url, stock, condition || 'good', req.params.id]);
-    res.json("Обновен!");
+    res.json("Продуктът беше обновен!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
 app.delete("/products/:id", authorization, async (req, res) => {
   try {
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     await pool.query("DELETE FROM products WHERE product_id = $1", [req.params.id]);
-    res.json("Изтрит!");
+    res.json("Продуктът беше изтрит!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
 app.get("/admin/orders", authorization, async (req, res) => {
   try {
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     const allOrders = await pool.query(`SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.user_id ORDER BY o.created_at DESC`);
     res.json(allOrders.rows);
   } catch (err) { res.status(500).send("Server Error"); }
@@ -465,13 +467,23 @@ app.get("/admin/orders", authorization, async (req, res) => {
 
 app.put("/admin/orders/:id/status", authorization, async (req, res) => {
   try {
+    const user = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (user.rows[0].role !== 'admin' && user.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     await pool.query("UPDATE orders SET status = $1 WHERE order_id = $2", [req.body.status, req.params.id]);
-    res.json("Обновен статус!");
+    res.json("Статусът е обновен!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
+// ==========================================
+//               5. УПРАВЛЕНИЕ НА ПОТРЕБИТЕЛИ
+// ==========================================
+
 app.get("/admin/users", authorization, async (req, res) => {
   try {
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (requester.rows[0].role !== 'admin' && requester.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     const users = await pool.query("SELECT user_id, first_name, last_name, email, role, created_at FROM users ORDER BY created_at DESC");
     res.json(users.rows);
   } catch (err) { res.status(500).send("Server Error"); }
@@ -479,15 +491,21 @@ app.get("/admin/users", authorization, async (req, res) => {
 
 app.delete("/admin/users/:id", authorization, async (req, res) => {
   try {
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (requester.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     await pool.query("DELETE FROM users WHERE user_id = $1", [req.params.id]);
-    res.json("Изтрит!");
+    res.json("Потребителят е изтрит!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
 app.put("/admin/users/:id/role", authorization, async (req, res) => {
   try {
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    if (requester.rows[0].role !== 'superadmin') return res.status(403).json("Нямате права!");
+    
     await pool.query("UPDATE users SET role = $1 WHERE user_id = $2", [req.body.role, req.params.id]);
-    res.json("Обновена роля!");
+    res.json("Ролята е обновена!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
@@ -496,7 +514,7 @@ app.put("/admin/users/:id/password", authorization, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(req.body.newPassword, salt);
     await pool.query("UPDATE users SET password = $1 WHERE user_id = $2", [bcryptPassword, req.params.id]);
-    res.json("Успешно!");
+    res.json("Паролата е променена!");
   } catch (err) { res.status(500).send("Server Error"); }
 });
 
@@ -507,26 +525,37 @@ app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_USER, to: process.env.EMAIL_USER, replyTo: email,
+      from: process.env.EMAIL_USER, 
+      to: process.env.EMAIL_USER, 
+      replyTo: email,
       subject: `Ново запитване от сайта: ${name}`,
-      html: `<div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;"><h2>Ново запитване</h2><p>Име: ${name}</p><p>Имейл: ${email}</p><p>${message}</p></div>`
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; border-radius: 10px;">
+            <h2 style="color: #ff6b00;">Ново запитване от сайта</h2>
+            <p><strong>Име:</strong> ${name}</p>
+            <p><strong>Имейл:</strong> ${email}</p>
+            <div style="background-color: #fff; padding: 15px; border-left: 4px solid #ff6b00; margin-top: 15px;">
+                <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+        </div>
+      `
     });
-    res.json("Съобщението е изпратено!");
-  } catch (err) { res.status(500).json("Грешка."); }
+    res.json("Съобщението е изпратено успешно!");
+  } catch (err) { res.status(500).json("Възникна грешка при изпращането."); }
 });
 
 // ==========================================
-//               7. WISHLIST
+//               7. ЛЮБИМИ (WISHLIST)
 // ==========================================
 app.post("/wishlist/toggle", authorization, async (req, res) => {
   try {
     const check = await pool.query("SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2", [req.user.user_id, req.body.product_id]);
     if (check.rows.length > 0) {
       await pool.query("DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2", [req.user.user_id, req.body.product_id]);
-      res.json({ isFavorite: false });
+      res.json({ message: "Премахнат от любими", isFavorite: false });
     } else {
       await pool.query("INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2)", [req.user.user_id, req.body.product_id]);
-      res.json({ isFavorite: true });
+      res.json({ message: "Добавен в любими", isFavorite: true });
     }
   } catch (err) { res.status(500).send("Server Error"); }
 });
@@ -546,7 +575,7 @@ app.get("/wishlist/check/:id", authorization, async (req, res) => {
 });
 
 // ==========================================
-//              START SERVER
+//              START SERVER (ФИНАЛНО)
 // ==========================================
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);
