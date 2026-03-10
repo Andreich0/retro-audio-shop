@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { Eye, ShoppingCart, PackageX, Heart } from "lucide-react";
 
+// Дефинираме API_URL в началото
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface Product {
   product_id: number;
   name: string;
@@ -29,17 +32,16 @@ export default function Home() {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    // Взимаме 4 продукта
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    // Взимаме 4 продукта - ОПРАВЕНО
     fetch(`${API_URL}/products`)
       .then((res) => res.json())
       .then((data) => setFeaturedProducts(data.slice(0, 4)))
       .catch((err) => console.error(err));
 
-    // Взимаме Любими
+    // Взимаме Любими - ОПРАВЕНО
     const token = localStorage.getItem("token");
     if (token) {
-        fetch("http://localhost:5000/wishlist", { headers: { token } })
+        fetch(`${API_URL}/wishlist`, { headers: { token } })
             .then(res => res.json())
             .then(data => setWishlist(Array.isArray(data) ? data.map((item: any) => item.product_id) : []))
             .catch(err => console.error(err));
@@ -56,7 +58,8 @@ export default function Home() {
     }
 
     try {
-        const res = await fetch("http://localhost:5000/wishlist/toggle", {
+        // ОПРАВЕНО за работа онлайн
+        const res = await fetch(`${API_URL}/wishlist/toggle`, {
             method: "POST",
             headers: { "Content-Type": "application/json", token },
             body: JSON.stringify({ product_id: productId })
@@ -76,9 +79,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#ff6b00] selection:text-white">
       
-      {/* =========================================
-          1. HERO СЕКЦИЯ С PARALLAX ЕФЕКТ
-      ========================================= */}
+      {/* 1. HERO СЕКЦИЯ С PARALLAX */}
       <div 
         className="relative w-full h-[85vh] flex flex-col items-center justify-center overflow-hidden bg-fixed bg-center bg-cover"
         style={{ 
@@ -101,20 +102,17 @@ export default function Home() {
           </p>
 
           <Link href="/shop">
-            <button className="bg-[#ff6b00] text-white text-lg md:text-xl font-black uppercase px-12 py-5 rounded hover:bg-[#e65c00] transition-all transform hover:scale-105 shadow-[0_0_40px_rgba(255,107,0,0.4)] tracking-widest border-2 border-[#ff6b00] hover:border-[#ff6b00]">
+            <button className="bg-[#ff6b00] text-white text-lg md:text-xl font-black uppercase px-12 py-5 rounded hover:bg-[#e65c00] transition-all transform hover:scale-105 shadow-[0_0_40px_rgba(255,107,0,0.4)] tracking-widest border-2 border-[#ff6b00]">
               Към Колекцията
             </button>
           </Link>
         </div>
       </div>
 
-      {/* =========================================
-          2. СЕКЦИЯ С КАРТИ
-      ========================================= */}
+      {/* 2. СЕКЦИЯ С КАРТИ */}
       <section className="bg-[#0a0a0a] py-16 px-6 border-b border-[#222]">
         <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 -mt-24 relative z-40">
-                
                 <div className="bg-[#18181b] border border-[#333] hover:border-[#ff6b00] p-10 rounded-xl text-center shadow-2xl transition duration-300 group">
                     <div className="text-[#ff6b00] mb-6 flex justify-center transform group-hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -151,12 +149,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =========================================
-          3. СЕКЦИЯ ПРОДУКТИ (ОБНОВЕН ДИЗАЙН)
-      ========================================= */}
+      {/* 3. СЕКЦИЯ ПРОДУКТИ */}
       <section className="py-24 px-4 bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto">
-            
             <h2 className="text-4xl md:text-5xl font-black text-center uppercase mb-16 tracking-wide">
               Избрани <span className="text-[#ff6b00]">Продукти</span>
             </h2>
@@ -172,7 +167,7 @@ export default function Home() {
                           <img
                               src={product.image_url || "/placeholder.jpg"}
                               alt={product.name}
-                              className={`w-full h-full object-contain transition duration-500 ${product.stock && product.stock > 0 ? 'group-hover/img:scale-105' : 'grayscale opacity-70'}`}
+                              className={`w-full h-full object-contain transition duration-500 ${product.stock > 0 ? 'group-hover/img:scale-105' : 'grayscale opacity-70'}`}
                           />
 
                           {product.stock === 0 && (
@@ -183,7 +178,6 @@ export default function Home() {
                               </div>
                           )}
 
-                          {/* БУТОН СЪРЦЕ */}
                           <button
                               onClick={(e) => toggleWishlist(e, product.product_id)}
                               className={`absolute top-3 right-3 p-2 rounded-full transition-all z-30 shadow-[0_2px_10px_rgba(0,0,0,0.5)] backdrop-blur-md border ${
@@ -216,14 +210,14 @@ export default function Home() {
                           </div>
 
                           <Link href={`/shop/${product.product_id}`}>
-                              <h2 className={`text-lg font-bold transition mb-1 uppercase leading-tight ${product.stock && product.stock > 0 ? 'text-white group-hover:text-[#ff6b00]' : 'text-gray-400'}`}>
+                              <h2 className={`text-lg font-bold transition mb-1 uppercase leading-tight ${product.stock > 0 ? 'text-white group-hover:text-[#ff6b00]' : 'text-gray-400'}`}>
                                       {product.name}
                               </h2>
                           </Link>
                           
                           <div className="mt-auto pt-4 border-t border-[#333]/50">
                               <div className="flex justify-between items-end mb-4">
-                                  <span className={`text-2xl font-black ${product.stock && product.stock > 0 ? 'text-white' : 'text-gray-500 line-through decoration-[#ff6b00]'}`}>
+                                  <span className={`text-2xl font-black ${product.stock > 0 ? 'text-white' : 'text-gray-500 line-through decoration-[#ff6b00]'}`}>
                                       {Number(product.price).toFixed(2)} <span className="text-sm font-normal">€</span>
                                   </span>
                               </div>
@@ -242,16 +236,16 @@ export default function Home() {
                                           price: product.price,
                                           image_url: product.image_url,
                                           category: product.category, 
-                                          stock: product.stock || 0
+                                          stock: product.stock 
                                       })}
                                       disabled={product.stock === 0}
                                       className={`flex-1 font-bold py-2 rounded-lg uppercase text-[10px] tracking-widest transition flex items-center justify-center gap-1 shadow-sm ${
-                                          product.stock && product.stock > 0 
+                                          product.stock > 0 
                                           ? "bg-[#ff6b00] hover:bg-[#e65c00] text-black shadow-[0_0_10px_rgba(255,107,0,0.2)]" 
                                           : "bg-[#222] border border-[#333] text-gray-500 cursor-not-allowed"
                                       }`}
                                   >
-                                      {product.stock && product.stock > 0 ? (
+                                      {product.stock > 0 ? (
                                           <><ShoppingCart size={14} /> Купи</>
                                       ) : (
                                           <span className="flex items-center gap-1"><PackageX size={14}/> Изчерпано</span>
