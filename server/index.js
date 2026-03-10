@@ -40,7 +40,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
   tls: {
-    rejectUnauthorized: false // Помага при грешки с сертификати в облака
+    rejectUnauthorized: false // Това пропуска грешките със сертификатите в Render
   }
 });
 
