@@ -9,6 +9,9 @@ import {
   KeyRound, ShieldCheck, Edit2, Save, Phone
 } from "lucide-react";
 
+// ДЕФИНИРАМЕ API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
+
 interface UserProfile {
   first_name: string;
   last_name: string;
@@ -96,6 +99,7 @@ export default function Dashboard() {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role"); // За всеки случай чистим и ролята
     router.push("/login");
   };
 
@@ -106,7 +110,7 @@ export default function Dashboard() {
 
     try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/auth/change-password", {
+        const res = await fetch(`${API_URL}/auth/change-password`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", token: token || "" },
             body: JSON.stringify(passData)
@@ -138,7 +142,7 @@ export default function Dashboard() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/auth/profile", {
+      const res = await fetch(`${API_URL}/auth/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", token: token || "" },
         body: JSON.stringify(profileData)
@@ -173,7 +177,7 @@ export default function Dashboard() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/orders/${orderId}/items`, {
+      const res = await fetch(`${API_URL}/orders/${orderId}/items`, {
         headers: { token: token || "" } 
       });
       const data = await res.json();
@@ -192,7 +196,7 @@ export default function Dashboard() {
     if (!confirm("Сигурни ли сте, че искате да анулирате тази неплатена поръчка? Продуктите ще бъдат върнати в наличност.")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/orders/${orderId}/cancel`, {
+      const res = await fetch(`${API_URL}/orders/${orderId}/cancel`, {
         method: "DELETE"
       });
 
@@ -214,11 +218,11 @@ export default function Dashboard() {
     
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/orders/${orderId}/retry-payment`, {
+      const res = await fetch(`${API_URL}/orders/${orderId}/retry-payment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "token": token || "" // <-- ТУК БЕШЕ ГРЕШКАТА, ВЕЧЕ Е ОПРАВЕНО!
+          "token": token || "" 
         }
       });
 
@@ -242,8 +246,9 @@ export default function Dashboard() {
       if (!token) return router.push("/login");
 
       try {
-        const userRes = await fetch("http://localhost:5000/auth/verify", { headers: { token } });
-        const ordersRes = await fetch("http://localhost:5000/orders/mine", { headers: { token } });
+        // ТУК БЕШЕ ГРЕШКАТА, ВЕЧЕ ИЗПОЛЗВА API_URL!
+        const userRes = await fetch(`${API_URL}/auth/verify`, { headers: { token } });
+        const ordersRes = await fetch(`${API_URL}/orders/mine`, { headers: { token } });
 
         if (!userRes.ok) {
             if (userRes.status === 401 || userRes.status === 403) return logout();
@@ -274,7 +279,7 @@ export default function Dashboard() {
     getData();
   }, [router]);
 
-  // Смятаме само завършените плащания (ако искаш да изключиш тези, които чакат плащане)
+  // Смятаме само завършените плащания
   const totalSpent = orders
     .filter(order => order.status !== 'awaiting_payment' && order.status !== 'cancelled')
     .reduce((acc, order) => acc + Number(order.total_price), 0);
@@ -496,7 +501,6 @@ export default function Dashboard() {
                                 {getStatusLabel(order.status)}
                               </span>
                               
-                              {/* Добавяме .toLowerCase() за да сме сигурни, че винаги ще хваща статуса! */}
                               {order.status?.toLowerCase() === 'awaiting_payment' && (
                                 <div className="flex gap-2">
                                     <button
