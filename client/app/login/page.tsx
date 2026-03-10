@@ -24,7 +24,7 @@ export default function LoginPage() {
 
     try {
       // Използваме API_URL константата, която дефинирахме горе
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`https://retro-audio-api-o7it.onrender.com/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(inputs),

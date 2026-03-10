@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
     try {
       // ИЗПОЛЗВАМЕ API_URL КОНСТАНТАТА
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const response = await fetch(`https://retro-audio-api-o7it.onrender.com/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
