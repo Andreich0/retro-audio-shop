@@ -7,7 +7,7 @@ import { useCart } from "../../context/CartContext";
 import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart } from "lucide-react";
 
 // ВЗИМАМЕ URL АДРЕСА НА API-ТО ОТ ПРОМЕНЛИВИТЕ НА СРЕДАТА
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://retro-audio-shop.vercel.app";
 
 interface Product {
   product_id: number;

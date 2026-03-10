@@ -30,10 +30,10 @@ export default function AdminUsersPage() {
       if (!token) { router.push("/login"); return; }
 
       // 1. Взимаме потребителите
-      const res = await fetch("http://localhost:5000/admin/users", { headers: { "token": token } });
+      const res = await fetch("http://retro-audio-shop.vercel.app/admin/users", { headers: { "token": token } });
       
       // 2. Взимаме и кой съм аз (за да разберем дали съм superadmin)
-      const resMe = await fetch("http://localhost:5000/auth/verify", { headers: { "token": token } });
+      const resMe = await fetch("http://retro-audio-shop.vercel.app/auth/verify", { headers: { "token": token } });
       
       if (res.ok && resMe.ok) {
         const data = await res.json();
@@ -58,7 +58,7 @@ export default function AdminUsersPage() {
     if (!confirm("ВНИМАНИЕ: Изтриването на потребител е необратимо! Сигурни ли сте?")) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/admin/users/${id}`, {
+      const res = await fetch(`http://retro-audio-shop.vercel.app/admin/users/${id}`, {
         method: "DELETE", headers: { "token": token || "" }
       });
       if (res.ok) setUsers(users.filter(u => u.user_id !== id));
@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/admin/users/${user.user_id}/role`, {
+      const res = await fetch(`http://retro-audio-shop.vercel.app/admin/users/${user.user_id}/role`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "token": token || "" },
         body: JSON.stringify({ role: newRole })
@@ -99,7 +99,7 @@ export default function AdminUsersPage() {
 
     try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:5000/admin/users/${userId}/password`, {
+        const res = await fetch(`http://retro-audio-shop.vercel.app/admin/users/${userId}/password`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", "token": token || "" },
             body: JSON.stringify({ newPassword: newPass })

@@ -41,7 +41,7 @@ export default function AdminOrders() {
         const token = localStorage.getItem("token");
         if (!token) return router.push("/login");
 
-        const res = await fetch("http://localhost:5000/admin/orders", {
+        const res = await fetch("http://retro-audio-shop.vercel.app/admin/orders", {
           headers: { token: token }
         });
 
@@ -67,7 +67,7 @@ export default function AdminOrders() {
   const updateStatus = async (id: number, newStatus: string) => {
     try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:5000/admin/orders/${id}/status`, {
+        const res = await fetch(`http://retro-audio-shop.vercel.app/admin/orders/${id}/status`, {
             method: "PUT",
             headers: { 
                 "Content-Type": "application/json",
@@ -97,7 +97,7 @@ export default function AdminOrders() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/orders/${orderId}/items`, {
+      const res = await fetch(`https://retro-audio-shop.vercel.app/orders/${orderId}/items`, {
         headers: { token: token || "" }
       });
       const data = await res.json();

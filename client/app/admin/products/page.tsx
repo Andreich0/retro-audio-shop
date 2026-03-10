@@ -38,7 +38,7 @@ export default function AdminPage() {
   // 1. Взимане на всички продукти
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/products");
+      const res = await fetch("http://retro-audio-shop.vercel.app/products");
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -70,7 +70,7 @@ export default function AdminPage() {
     formData.append("image", file);
 
     try {
-      const res = await fetch("http://localhost:5000/upload", { method: "POST", body: formData });
+      const res = await fetch("http://retro-audio-shop.vercel.app/upload", { method: "POST", body: formData });
       const data = await res.json();
       setInputs((prev) => ({ ...prev, image_url: data.url }));
     } catch (err) {
@@ -131,11 +131,11 @@ export default function AdminPage() {
         stock: parseInt(inputs.stock)
       };
 
-      let url = "http://localhost:5000/products";
+      let url = "http://retro-audio-shop.vercel.app/products";
       let method = "POST";
 
       if (editingId) {
-        url = `http://localhost:5000/products/${editingId}`;
+        url = `http://retro-audio-shop.vercel.app/products/${editingId}`;
         method = "PUT";
       }
 
@@ -164,7 +164,7 @@ export default function AdminPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/products/${id}`, {
+      const response = await fetch(`http://retro-audio-shop.vercel.app/products/${id}`, {
         method: "DELETE",
         headers: { "token": token || "" }
       });
