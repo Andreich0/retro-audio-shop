@@ -3,7 +3,9 @@
 import { useState, useEffect, ChangeEvent, FormEvent, DragEvent } from "react";
 import { useRouter } from "next/navigation";
 
-// Интерфейс за данните (Добавихме condition)
+// --- ДЕФИНИРАМЕ API_URL ДА СОЧИ КЪМ СЪРВЪРА (RENDER), А НЕ КЪМ VERCEL ---
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
+
 interface Product {
   product_id: number;
   name: string;
@@ -12,7 +14,7 @@ interface Product {
   category: string;
   image_url: string;
   stock: string;
-  condition?: string; // <--- НОВО ПОЛЕ
+  condition?: string;
 }
 
 export default function AdminPage() {
@@ -27,7 +29,7 @@ export default function AdminPage() {
     category: "Cassette",
     image_url: "",
     stock: "",
-    condition: "good" // <--- НОВО ПОЛЕ (по подразбиране)
+    condition: "good"
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -38,11 +40,12 @@ export default function AdminPage() {
   // 1. Взимане на всички продукти
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://retro-audio-shop.vercel.app/products");
+      // ИЗПОЛЗВАМЕ API_URL
+      const res = await fetch(`${API_URL}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
-      console.error(err);
+      console.error("Грешка при зареждане на продукти:", err);
     }
   };
 
@@ -58,7 +61,7 @@ export default function AdminPage() {
     setInputs({ ...inputs, image_url: e.target.value });
   };
 
-  // --- ЛОГИКА ЗА КАЧВАНЕ ---
+  // --- ЛОГИКА ЗА КАЧВАНЕ НА СНИМКА ---
   const uploadFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
         alert("Моля, качете файл изображение!");
@@ -70,7 +73,11 @@ export default function AdminPage() {
     formData.append("image", file);
 
     try {
-      const res = await fetch("http://retro-audio-shop.vercel.app/upload", { method: "POST", body: formData });
+      // ИЗПОЛЗВАМЕ API_URL
+      const res = await fetch(`${API_URL}/upload`, { 
+        method: "POST", 
+        body: formData 
+      });
       const data = await res.json();
       setInputs((prev) => ({ ...prev, image_url: data.url }));
     } catch (err) {
@@ -121,7 +128,7 @@ export default function AdminPage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Моля, влезте в профила си!");
+        alert("Моля, влезте в профила си като администратор!");
         return;
       }
 
@@ -131,11 +138,12 @@ export default function AdminPage() {
         stock: parseInt(inputs.stock)
       };
 
-      let url = "http://retro-audio-shop.vercel.app/products";
+      // ИЗПОЛЗВАМЕ API_URL
+      let url = `${API_URL}/products`;
       let method = "POST";
 
       if (editingId) {
-        url = `http://retro-audio-shop.vercel.app/products/${editingId}`;
+        url = `${API_URL}/products/${editingId}`;
         method = "PUT";
       }
 
@@ -159,12 +167,14 @@ export default function AdminPage() {
     }
   };
 
+  // ИЗТРИВАНЕ
   const handleDelete = async (id: number) => {
     if (!confirm("Сигурни ли сте, че искате да изтриете този продукт?")) return;
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://retro-audio-shop.vercel.app/products/${id}`, {
+      // ИЗПОЛЗВАМЕ API_URL
+      const response = await fetch(`${API_URL}/products/${id}`, {
         method: "DELETE",
         headers: { "token": token || "" }
       });
@@ -188,7 +198,7 @@ export default function AdminPage() {
       category: product.category,
       image_url: product.image_url,
       stock: product.stock.toString(),
-      condition: product.condition || "good" // <--- Зареждаме текущото състояние
+      condition: product.condition || "good"
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -232,7 +242,6 @@ export default function AdminPage() {
               </select>
             </div>
 
-            {/* --- НОВО: ПОЛЕ ЗА СЪСТОЯНИЕ --- */}
             <div className="md:col-span-2">
                 <label className="block text-xs text-[#ff6b00] font-black mb-2 uppercase tracking-wider">Състояние на продукта</label>
                 <select name="condition" className="w-full p-3 rounded bg-[#0f0f13] border border-[#ff6b00]/50 focus:border-[#ff6b00] outline-none text-white cursor-pointer font-bold" value={inputs.condition} onChange={handleChange}>

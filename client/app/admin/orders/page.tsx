@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Package, MapPin, ChevronRight, CheckCircle, Truck, XCircle, Clock } from "lucide-react";
 import Link from "next/link";
 
+// ДЕФИНИРАМЕ API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
+
 interface Order {
   order_id: number;
   created_at: string;
@@ -41,7 +44,8 @@ export default function AdminOrders() {
         const token = localStorage.getItem("token");
         if (!token) return router.push("/login");
 
-        const res = await fetch("http://retro-audio-shop.vercel.app/admin/orders", {
+        // ИЗПОЛЗВАМЕ API_URL ТУК
+        const res = await fetch(`${API_URL}/admin/orders`, {
           headers: { token: token }
         });
 
@@ -67,7 +71,8 @@ export default function AdminOrders() {
   const updateStatus = async (id: number, newStatus: string) => {
     try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://retro-audio-shop.vercel.app/admin/orders/${id}/status`, {
+        // ИЗПОЛЗВАМЕ API_URL ТУК
+        const res = await fetch(`${API_URL}/admin/orders/${id}/status`, {
             method: "PUT",
             headers: { 
                 "Content-Type": "application/json",
@@ -97,7 +102,8 @@ export default function AdminOrders() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`https://retro-audio-shop.vercel.app/orders/${orderId}/items`, {
+      // ИЗПОЛЗВАМЕ API_URL ТУК (в оригиналния код сочеше към vercel)
+      const res = await fetch(`${API_URL}/orders/${orderId}/items`, {
         headers: { token: token || "" }
       });
       const data = await res.json();
@@ -109,7 +115,7 @@ export default function AdminOrders() {
     }
   };
 
-  // Помощна функция за цветовете на статуса (опростена за select border-а)
+  // Помощна функция за цветовете на статуса
   const getStatusColor = (status: string) => {
     if (!status) return "border-gray-500 text-gray-500";
     switch (status.toLowerCase()) {

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Shield, ShieldOff, UserCheck, Search, ShieldAlert, Key, Crown } from "lucide-react"; // Crown иконка за SuperAdmin
+import { Trash2, Shield, ShieldOff, UserCheck, Search, ShieldAlert, Key, Crown } from "lucide-react"; 
 
-// Добавяме икона Key и Crown
+// --- ДЕФИНИРАМЕ API_URL ---
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 interface UserData {
   user_id: string;
@@ -20,26 +21,24 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Трябва да знаем ролята на ТЕКУЩИЯ потребител (ти), за да крием бутони
   const [myRole, setMyRole] = useState(""); 
 
-  // Взимане на потребителите + Моята роля
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) { router.push("/login"); return; }
 
-      // 1. Взимаме потребителите
-      const res = await fetch("http://retro-audio-shop.vercel.app/admin/users", { headers: { "token": token } });
+      // ИЗПОЛЗВАМЕ API_URL ТУК
+      const res = await fetch(`${API_URL}/admin/users`, { headers: { "token": token } });
       
-      // 2. Взимаме и кой съм аз (за да разберем дали съм superadmin)
-      const resMe = await fetch("http://retro-audio-shop.vercel.app/auth/verify", { headers: { "token": token } });
+      // ИЗПОЛЗВАМЕ API_URL ТУК
+      const resMe = await fetch(`${API_URL}/auth/verify`, { headers: { "token": token } });
       
       if (res.ok && resMe.ok) {
         const data = await res.json();
         const me = await resMe.json();
         setUsers(data);
-        setMyRole(me.role); // Запазваме моята роля
+        setMyRole(me.role); 
       } else {
         router.push("/");
       }
@@ -58,7 +57,8 @@ export default function AdminUsersPage() {
     if (!confirm("ВНИМАНИЕ: Изтриването на потребител е необратимо! Сигурни ли сте?")) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://retro-audio-shop.vercel.app/admin/users/${id}`, {
+      // ИЗПОЛЗВАМЕ API_URL ТУК
+      const res = await fetch(`${API_URL}/admin/users/${id}`, {
         method: "DELETE", headers: { "token": token || "" }
       });
       if (res.ok) setUsers(users.filter(u => u.user_id !== id));
@@ -67,7 +67,6 @@ export default function AdminUsersPage() {
   };
 
   const toggleUserRole = async (user: UserData) => {
-    // Ако не си superadmin, не прави нищо (дори да кликнеш)
     if (myRole !== 'superadmin') {
         alert("Само Super Admin може да променя роли!");
         return;
@@ -78,13 +77,14 @@ export default function AdminUsersPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://retro-audio-shop.vercel.app/admin/users/${user.user_id}/role`, {
+      // ИЗПОЛЗВАМЕ API_URL ТУК
+      const res = await fetch(`${API_URL}/admin/users/${user.user_id}/role`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "token": token || "" },
         body: JSON.stringify({ role: newRole })
       });
       if (res.ok) {
-        fetchUsers(); // Презареждаме, за да видим новата роля
+        fetchUsers(); 
       } else {
         const msg = await res.json();
         alert(msg);
@@ -92,14 +92,14 @@ export default function AdminUsersPage() {
     } catch (err) { console.error(err); }
   };
 
-  // НОВА ФУНКЦИЯ: Смяна на парола
   const handleResetPassword = async (userId: string, userName: string) => {
     const newPass = prompt(`Въведете НОВА парола за ${userName}:`);
-    if (!newPass) return; // Ако е натиснал Cancel
+    if (!newPass) return; 
 
     try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://retro-audio-shop.vercel.app/admin/users/${userId}/password`, {
+        // ИЗПОЛЗВАМЕ API_URL ТУК
+        const res = await fetch(`${API_URL}/admin/users/${userId}/password`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", "token": token || "" },
             body: JSON.stringify({ newPassword: newPass })
@@ -151,7 +151,7 @@ export default function AdminUsersPage() {
                             </td>
                             <td className="p-5 text-right flex justify-end gap-2">
                                 
-                                {/* 1. СМЯНА НА ПАРОЛА (За всички админи) */}
+                                {/* 1. СМЯНА НА ПАРОЛА */}
                                 <button 
                                     onClick={() => handleResetPassword(user.user_id, user.first_name)}
                                     className="p-2 border border-gray-600 text-gray-400 hover:text-white hover:border-white rounded transition"
@@ -160,7 +160,7 @@ export default function AdminUsersPage() {
                                     <Key size={16} />
                                 </button>
 
-                                {/* 2. СМЯНА НА РОЛЯ (Само за SUPERADMIN) */}
+                                {/* 2. СМЯНА НА РОЛЯ */}
                                 {myRole === 'superadmin' && user.role !== 'superadmin' && (
                                     <button 
                                         onClick={() => toggleUserRole(user)}
@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
                                     </button>
                                 )}
 
-                                {/* 3. ИЗТРИВАНЕ (Само за SUPERADMIN) */}
+                                {/* 3. ИЗТРИВАНЕ */}
                                 {myRole === 'superadmin' && user.role !== 'superadmin' && (
                                     <button 
                                         onClick={() => handleDeleteUser(user.user_id)}
