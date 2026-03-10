@@ -3,11 +3,14 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "../../context/AuthContext"; // Увери се, че пътят е правилен
+import { useAuth } from "../../context/AuthContext";
+
+// ДЕФИНИРАМЕ API URL ТУК, ЗА ДА Е СИГУРНО, ЧЕ НЯМА ДА Е UNDEFINED
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth(); // Взимаме функцията от контекста
+  const { login } = useAuth();
 
   const [inputs, setInputs] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +23,8 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      // Използваме API_URL константата, която дефинирахме горе
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(inputs),
@@ -29,18 +33,18 @@ export default function LoginPage() {
       const parseRes = await res.json();
 
       if (res.ok && parseRes.token) {
-        // Използваме логин функцията от контекста
-        // Тя ще запише токена в localStorage и ще ъпдейтне Navbar веднага
         login(parseRes.token, parseRes.role || "user");
         
-        // Пренасочваме към дашборда
-        router.push("/dashboard");
+        // Малка хитринка: изчакваме малко, за да се запише токена в localStorage
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 100);
       } else {
         setError(parseRes.message || "Грешен имейл или парола.");
       }
     } catch (err) {
-      console.error(err);
-      setError("Сървърна грешка. Моля, опитайте по-късно.");
+      console.error("Login Error:", err);
+      setError("Сървърна грешка. Провери дали сървърът в Render е буден.");
     } finally {
       setIsSubmitting(false);
     }
@@ -51,7 +55,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-[#0f0f13] px-4">
+    <div className="min-h-[80vh] flex items-center justify-center bg-[#0f0f13] px-4 py-12">
       <div className="bg-[#18181b] p-10 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full max-w-md border border-[#333]">
         <h1 className="text-4xl font-black text-center mb-10 text-white tracking-widest uppercase italic">
           Влез в <span className="text-[#ff6b00]">Системата</span>
@@ -64,7 +68,6 @@ export default function LoginPage() {
         )}
         
         <form onSubmit={onSubmit} className="space-y-6">
-          {/* Email Поле */}
           <div>
             <label className="block text-gray-400 mb-2 font-bold text-xs uppercase tracking-widest">Имейл Адрес</label>
             <input
@@ -73,12 +76,11 @@ export default function LoginPage() {
               required
               value={inputs.email}
               onChange={handleChange}
-              className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 focus:border-[#ff6b00] focus:outline-none transition-all duration-300"
+              className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 focus:border-[#ff6b00] focus:outline-none transition-all duration-300 placeholder:text-gray-700"
               placeholder="your@email.com"
             />
           </div>
 
-          {/* Парола Поле */}
           <div className="relative">
             <label className="block text-gray-400 mb-2 font-bold text-xs uppercase tracking-widest">Парола</label>
             <input
@@ -87,7 +89,7 @@ export default function LoginPage() {
               required
               value={inputs.password}
               onChange={handleChange}
-              className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 pr-12 focus:border-[#ff6b00] focus:outline-none transition-all duration-300"
+              className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 pr-12 focus:border-[#ff6b00] focus:outline-none transition-all duration-300 placeholder:text-gray-700"
               placeholder="••••••••"
             />
             
@@ -117,14 +119,16 @@ export default function LoginPage() {
             {isSubmitting ? "Проверка..." : "ВЛЕЗ"}
           </button>
         </form>
-              <div className="flex justify-end mt-2 mb-4">
-                <Link 
-                    href="/forgot-password" 
-                    className="text-[10px] uppercase font-bold text-gray-500 hover:text-[#ff6b00] tracking-widest transition-colors"
-                >
-                    Забравена парола?
-                </Link>
-            </div>
+
+        <div className="flex justify-end mt-2 mb-4">
+          <Link 
+            href="/forgot-password" 
+            className="text-[10px] uppercase font-bold text-gray-500 hover:text-[#ff6b00] tracking-widest transition-colors"
+          >
+            Забравена парола?
+          </Link>
+        </div>
+
         <div className="mt-8 text-center border-t border-[#333] pt-6">
           <p className="text-gray-500 text-sm mb-2">Все още нямаш акаунт?</p>
           <Link href="/register" className="text-white font-bold hover:text-[#ff6b00] transition uppercase text-xs tracking-widest border-b border-transparent hover:border-[#ff6b00] pb-1">
