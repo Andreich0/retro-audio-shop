@@ -29,6 +29,7 @@ export default function CheckoutPage() {
       fetch(`${API_URL}/orders/${orderId}/cancel`, { method: "DELETE" })
         .then(() => {
           alert("Плащането беше прекъснато. Поръчката не е завършена.");
+          // Изчистваме URL адреса, за да не се показва ?canceled=true
           window.history.replaceState(null, '', '/checkout');
         })
         .catch(err => console.error(err));
@@ -110,7 +111,7 @@ export default function CheckoutPage() {
     }
   };
 
-if (cart.length === 0) {
+  if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white px-4 font-sans relative overflow-hidden">
         {/* Декоративен фон */}
