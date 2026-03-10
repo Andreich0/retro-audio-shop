@@ -33,12 +33,15 @@ app.use("/uploads", express.static("uploads"));
 // ==========================================
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, 
+  port: 587,
+  secure: false, // Трябва да е false за порт 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // Помага при грешки с сертификати в облака
+  }
 });
 
 // ПОМОЩНА ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА
