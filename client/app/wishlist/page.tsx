@@ -15,7 +15,7 @@ interface Product {
   condition?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://retro-audio-api-o7it.onrender.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 const conditionDisplayMap: { [key: string]: string } = {
   "new": "НОВ",

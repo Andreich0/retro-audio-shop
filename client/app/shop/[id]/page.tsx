@@ -25,7 +25,7 @@ const conditionMap: { [key: string]: string } = {
   "parts": "За части"
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://retro-audio-api-o7it.onrender.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 export default function ProductPage() {
   const params = useParams();
@@ -66,7 +66,7 @@ export default function ProductPage() {
         // 3. Взимаме любими (ако е логнат)
         const token = localStorage.getItem("token");
         if (token) {
-            const wlRes = await fetch("http://retro-audio-api-o7it.onrender.com/wishlist", { headers: { token } });
+            const wlRes = await fetch("https://retro-audio-api-o7it.onrender.com/wishlist", { headers: { token } });
             if (wlRes.ok) {
                 const wlData = await wlRes.json();
                 setWishlist(wlData.map((item: any) => item.product_id));
@@ -93,7 +93,7 @@ export default function ProductPage() {
       }
 
       try {
-          const res = await fetch("http://retro-audio-api-o7it.onrender.com/wishlist/toggle", {
+          const res = await fetch("https://retro-audio-api-o7it.onrender.com/wishlist/toggle", {
               method: "POST",
               headers: { "Content-Type": "application/json", token },
               body: JSON.stringify({ product_id: productId })

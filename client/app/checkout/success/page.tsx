@@ -15,7 +15,7 @@ function SuccessContent() {
     const orderId = params.get("orderId");
 
     if (orderId) {
-      fetch(`http://retro-audio-api-o7it.onrender.com/orders/${orderId}/success`, {
+      fetch(`https://retro-audio-api-o7it.onrender.com/orders/${orderId}/success`, {
         method: "PUT"
       }).catch(err => console.error(err));
     }
