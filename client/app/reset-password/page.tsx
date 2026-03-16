@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Eye, EyeOff, CheckCircle, AlertTriangle, ArrowRight } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
+
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -14,8 +16,7 @@ function ResetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<{ type: "idle" | "loading" | "success" | "error"; text: string }>({ type: "idle", text: "" });
 
-  // ЗАЩИТА: Ако потребителят отвори този линк, автоматично го разлогваме, 
-  // за да предотвратим конфликти с други сесии!
+  // ЗАЩИТА
   useEffect(() => {
     localStorage.removeItem("token");
   }, []);
@@ -23,19 +24,16 @@ function ResetPasswordContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Проверка 1: Има ли изобщо токен в URL-а?
     if (!token) {
       setStatus({ type: "error", text: "Липсва токен за сигурност. Моля, заявете нов линк." });
       return;
     }
 
-    // Проверка 2: Съвпадат ли паролите?
     if (passwords.newPassword !== passwords.confirmPassword) {
       setStatus({ type: "error", text: "Паролите не съвпадат!" });
       return;
     }
 
-    // Проверка 3: Дължина на паролата
     if (passwords.newPassword.length < 6) {
       setStatus({ type: "error", text: "Паролата трябва да е поне 6 символа." });
       return;
@@ -44,7 +42,7 @@ function ResetPasswordContent() {
     setStatus({ type: "loading", text: "" });
 
     try {
-      const res = await fetch("https://retro-audio-api-o7it.onrender.com/auth/reset-password", {
+      const res = await fetch(`${API_URL}/auth/reset-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: passwords.newPassword })

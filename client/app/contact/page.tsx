@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle, CassetteTape } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
     
     try {
-      const response = await fetch("https://retro-audio-shop.vercel.app/contact", {
+      const response = await fetch(`${API_URL}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

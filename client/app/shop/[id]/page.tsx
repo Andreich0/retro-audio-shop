@@ -44,7 +44,6 @@ export default function ProductPage() {
 
     const fetchData = async () => {
       try {
-        // 1. Взимаме основния продукт
         const res = await fetch(`${API_URL}/products/${id}`);
         if (!res.ok) throw new Error(`Грешка при зареждане: ${res.status}`);
         
@@ -52,21 +51,18 @@ export default function ProductPage() {
         const mainProduct = Array.isArray(data) ? data[0] : data;
         setProduct(mainProduct);
 
-        // 2. Взимаме всички продукти за "Сходни"
         const allRes = await fetch(`${API_URL}/products`);
         if (allRes.ok) {
             const allData = await allRes.json();
-            // Филтрираме същата категория, махаме текущия продукт и взимаме макс 3
             const related = allData
                 .filter((p: Product) => p.category === mainProduct.category && p.product_id !== mainProduct.product_id)
                 .slice(0, 3);
             setRelatedProducts(related);
         }
 
-        // 3. Взимаме любими (ако е логнат)
         const token = localStorage.getItem("token");
         if (token) {
-            const wlRes = await fetch("https://retro-audio-api-o7it.onrender.com/wishlist", { headers: { token } });
+            const wlRes = await fetch(`${API_URL}/wishlist`, { headers: { token } });
             if (wlRes.ok) {
                 const wlData = await wlRes.json();
                 setWishlist(wlData.map((item: any) => item.product_id));
@@ -93,7 +89,7 @@ export default function ProductPage() {
       }
 
       try {
-          const res = await fetch("https://retro-audio-api-o7it.onrender.com/wishlist/toggle", {
+          const res = await fetch(`${API_URL}/wishlist/toggle`, {
               method: "POST",
               headers: { "Content-Type": "application/json", token },
               body: JSON.stringify({ product_id: productId })
@@ -180,7 +176,6 @@ export default function ProductPage() {
                     )}
                 </div>
 
-                {/* БУТОН СЪРЦЕ ЗА ОСНОВНИЯ ПРОДУКТ */}
                 <button
                     onClick={(e) => toggleWishlist(e, product.product_id)}
                     className={`absolute top-6 right-6 p-3 rounded-full transition-all z-30 shadow-[0_2px_15px_rgba(0,0,0,0.5)] backdrop-blur-md border ${

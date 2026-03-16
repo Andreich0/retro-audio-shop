@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -14,7 +16,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://retro-audio-shop.vercel.app/auth/forgot-password", {
+      const res = await fetch(`${API_URL}/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })

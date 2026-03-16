@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext"; 
 import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart } from "lucide-react";
 
-// ВЗИМАМЕ URL АДРЕСА НА API-ТО ОТ ПРОМЕНЛИВИТЕ НА СРЕДАТА
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-shop.vercel.app";
+// ВЗИМАМЕ URL АДРЕСА НА API-ТО ОТ ПРОМЕНЛИВИТЕ НА СРЕДАТА (Оправено да сочи към Render)
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 interface Product {
   product_id: number;
@@ -74,7 +74,6 @@ const ShopContent = () => {
   useEffect(() => {
     const fetchProductsAndWishlist = async () => {
       try {
-        // 1. ЗАМЕНЕНО: Използваме API_URL променливата
         const response = await fetch(`${API_URL}/products`);
         const data = await response.json();
         setProducts(data);
@@ -88,7 +87,6 @@ const ShopContent = () => {
 
         const token = localStorage.getItem("token");
         if (token) {
-            // 2. ЗАМЕНЕНО: Използваме API_URL променливата
             const wlRes = await fetch(`${API_URL}/wishlist`, { headers: { token } });
             if (wlRes.ok) {
                 const wlData = await wlRes.json();
@@ -173,7 +171,6 @@ const ShopContent = () => {
       }
 
       try {
-          // 3. ЗАМЕНЕНО: Използваме API_URL променливата
           const res = await fetch(`${API_URL}/wishlist/toggle`, {
               method: "POST",
               headers: { "Content-Type": "application/json", token },
