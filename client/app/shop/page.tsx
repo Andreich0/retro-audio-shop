@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext"; 
 import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart } from "lucide-react";
 
-// ВЗИМАМЕ URL АДРЕСА НА API-ТО ОТ ПРОМЕНЛИВИТЕ НА СРЕДАТА (Оправено да сочи към Render)
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 interface Product {
@@ -372,7 +371,8 @@ const ShopContent = () => {
 
             {/* MAIN CONTENT AREA */}
             <main className="lg:w-3/4 w-full">
-                <div className="relative z-50 flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-[#333] gap-4">
+                {/* ТУК БЕШЕ ПРОБЛЕМЪТ! Намален z-index от 50 на 20, за да се скрива под навбара */}
+                <div className="relative z-20 flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-[#333] gap-4">
                     <div>
                         <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">
                             Продукти
@@ -392,7 +392,7 @@ const ShopContent = () => {
                             Намерени: <span className="text-[#ff6b00] font-bold">{filteredProducts.length}</span>
                         </span>
 
-                        <div className="relative z-50 w-full sm:w-auto">
+                        <div className="relative z-30 w-full sm:w-auto">
                             <button 
                                 onClick={() => setIsSortOpen(!isSortOpen)}
                                 className={`flex items-center justify-between w-full sm:w-56 bg-[#18181b] border ${isSortOpen ? 'border-[#ff6b00]' : 'border-[#333]'} rounded-xl px-4 py-2.5 hover:border-[#ff6b00] transition-colors`}
