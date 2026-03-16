@@ -8,7 +8,6 @@ const authorization = require("./middleware/authorization");
 const multer = require("multer");
 const fs = require("fs");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const nodemailer = require("nodemailer");
 const path = require("path");
 require("dotenv").config();
 
@@ -29,20 +28,43 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // ==========================================
-//              NODEMAILER (КОРИГИРАН)
+//               BREVO API (ИМЕЙЛИ)
 // ==========================================
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Трябва да е false за порт 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false // Това пропуска грешките със сертификатите в Render
+
+// Универсална функция за изпращане на имейли през Brevo
+const sendBrevoEmail = async (toEmail, subject, htmlContent, replyToEmail = null) => {
+  try {
+    const bodyData = {
+      sender: { name: "Retro Audio Shop", email: "retroaudio.sales@gmail.com" }, // Твоят верифициран имейл в Brevo
+      to: [{ email: toEmail }],
+      subject: subject,
+      htmlContent: htmlContent
+    };
+
+    if (replyToEmail) {
+      bodyData.replyTo = { email: replyToEmail };
+    }
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(bodyData)
+    });
+
+    if (response.ok) {
+      console.log(`✅ Имейл до ${toEmail} е изпратен успешно!`);
+    } else {
+      const errorData = await response.json();
+      console.error("❌ Грешка от Brevo API:", errorData);
+    }
+  } catch (err) {
+    console.error("❌ Сървърна грешка при връзка с Brevo:", err);
   }
-});
+};
 
 // ПОМОЩНА ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА
 const sendOrderConfirmationEmails = async (orderId) => {
@@ -80,27 +102,22 @@ const sendOrderConfirmationEmails = async (orderId) => {
         if (userRes.rows.length > 0) customerEmail = userRes.rows[0].email;
     }
 
+    // 1. Имейл до клиента (ако е регистриран)
     if (customerEmail) {
-        await transporter.sendMail({
-            from: `"Retro Audio" <${process.env.EMAIL_USER}>`,
-            to: customerEmail,
-            subject: `Потвърждение на поръчка #${orderId}`,
-            html: emailHtml
-        });
+        await sendBrevoEmail(customerEmail, `Потвърждение на поръчка #${orderId}`, emailHtml);
     }
 
-    await transporter.sendMail({
-        from: `"Retro Audio System" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER,
-        subject: `🛒 НОВА ПОРЪЧКА #${orderId} - ${order.total_price} €`,
-        html: `<p>Имаш нова поръчка от <b>${order.customer_first_name} ${order.customer_last_name}</b>.</p>
-               <p>Телефон: ${order.customer_phone}</p>
-               <p>Стойност: ${order.total_price} €</p>
-               <p>Влез в Админ панела за повече детайли.</p>`
-    });
+    // 2. Имейл до теб (Админа)
+    const adminHtml = `
+      <p>Имаш нова поръчка от <b>${order.customer_first_name} ${order.customer_last_name}</b>.</p>
+      <p>Телефон: ${order.customer_phone}</p>
+      <p>Стойност: ${order.total_price} €</p>
+      <p>Влез в Админ панела за повече детайли.</p>
+    `;
+    await sendBrevoEmail("retroaudio.sales@gmail.com", `🛒 НОВА ПОРЪЧКА #${orderId} - ${order.total_price} €`, adminHtml);
 
   } catch (err) {
-    console.error("Грешка при изпращане на имейли:", err);
+    console.error("Грешка при генериране на имейли за поръчка:", err);
   }
 };
 
@@ -207,18 +224,17 @@ app.post("/auth/forgot-password", async (req, res) => {
     const resetToken = jwt.sign({ user_id: user.rows[0].user_id }, process.env.JWT_SECRET || "secret_key", { expiresIn: "15m" });
     const resetLink = `https://retro-audio-shop.vercel.app/reset-password?token=${resetToken}`;
 
-    await transporter.sendMail({
-      from: `"Retro Audio Support" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Възстановяване на парола",
-      html: `
-        <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff; border-radius: 10px;">
-          <h2 style="color: #ff6b00;">Заявка за нова парола</h2>
-          <p>Цъкнете на бутона по-долу, за да създадете нова парола. Линкът важи 15 мин.</p>
-          <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background: #ff6b00; color: #000; text-decoration: none; font-weight: bold; border-radius: 5px;">Възстанови Парола</a>
-        </div>
-      `
-    });
+    const htmlContent = `
+      <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff; border-radius: 10px;">
+        <h2 style="color: #ff6b00;">Заявка за нова парола</h2>
+        <p>Цъкнете на бутона по-долу, за да създадете нова парола. Линкът важи 15 мин.</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background: #ff6b00; color: #000; text-decoration: none; font-weight: bold; border-radius: 5px;">Възстанови Парола</a>
+      </div>
+    `;
+
+    // Пращане през Brevo
+    await sendBrevoEmail(email, "Възстановяване на парола", htmlContent);
+
     res.json("Ако този имейл съществува, сме изпратили линк.");
   } catch (err) {
     console.error(err);
@@ -365,7 +381,6 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-// --- ПОВТОРНО ПЛАЩАНЕ ---
 app.post("/orders/:id/retry-payment", authorization, async (req, res) => {
   try {
     const { id } = req.params;
@@ -409,7 +424,7 @@ app.delete("/orders/:id/cancel", async (req, res) => {
 });
 
 // ==========================================
-//              4. АДМИН ПАНЕЛ & СНИМКИ
+//               4. АДМИН ПАНЕЛ & СНИМКИ
 // ==========================================
 
 const storage = multer.diskStorage({
@@ -527,22 +542,20 @@ app.put("/admin/users/:id/password", authorization, async (req, res) => {
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER, 
-      to: process.env.EMAIL_USER, 
-      replyTo: email,
-      subject: `Ново запитване от сайта: ${name}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; border-radius: 10px;">
-            <h2 style="color: #ff6b00;">Ново запитване от сайта</h2>
-            <p><strong>Име:</strong> ${name}</p>
-            <p><strong>Имейл:</strong> ${email}</p>
-            <div style="background-color: #fff; padding: 15px; border-left: 4px solid #ff6b00; margin-top: 15px;">
-                <p style="white-space: pre-wrap;">${message}</p>
-            </div>
-        </div>
-      `
-    });
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; border-radius: 10px;">
+          <h2 style="color: #ff6b00;">Ново запитване от сайта</h2>
+          <p><strong>Име:</strong> ${name}</p>
+          <p><strong>Имейл:</strong> ${email}</p>
+          <div style="background-color: #fff; padding: 15px; border-left: 4px solid #ff6b00; margin-top: 15px;">
+              <p style="white-space: pre-wrap;">${message}</p>
+          </div>
+      </div>
+    `;
+    
+    // Пращаме го на себе си (админа), като слагаме reply-to да е имейла на клиента
+    await sendBrevoEmail("retroaudio.sales@gmail.com", `Ново запитване от сайта: ${name}`, htmlContent, email);
+    
     res.json("Съобщението е изпратено успешно!");
   } catch (err) { res.status(500).json("Възникна грешка при изпращането."); }
 });
@@ -578,7 +591,7 @@ app.get("/wishlist/check/:id", authorization, async (req, res) => {
 });
 
 // ==========================================
-//              START SERVER (ФИНАЛНО)
+//               START SERVER
 // ==========================================
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);
