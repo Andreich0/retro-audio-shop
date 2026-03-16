@@ -14,7 +14,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://retro-audio-shop.vercel.app/auth/forgot-password", {
+      const res = await fetch("https://retro-audio-shop.vercel.app/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
