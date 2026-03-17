@@ -28,7 +28,7 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // ==========================================
-//               BREVO API (ИМЕЙЛИ)
+//              BREVO API (ИМЕЙЛИ)
 // ==========================================
 
 // Универсална функция за изпращане на имейли през Brevo
@@ -66,7 +66,39 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent, replyToEmail = null
   }
 };
 
-// ПОМОЩНА ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА
+// НОВО: ФУНКЦИЯ ЗА WELCOME ИМЕЙЛ (ПРИ РЕГИСТРАЦИЯ)
+const sendWelcomeEmail = async (userEmail, firstName) => {
+  const htmlContent = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0a0a0a; padding: 40px 20px; border-radius: 12px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #ff6b00; margin: 0; font-size: 28px; font-style: italic; letter-spacing: -1px; text-transform: uppercase;">RETRO <span style="color: #fff;">AUDIO</span></h1>
+        <p style="color: #ff6b00; font-size: 10px; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase;">Audio Shop</p>
+      </div>
+      
+      <div style="background-color: #18181b; border: 1px solid #333; border-top: 4px solid #ff6b00; border-radius: 8px; padding: 30px;">
+        <h2 style="color: #fff; margin-top: 0;">Добре дошли, ${firstName}! 🎧</h2>
+        <p style="color: #ccc; line-height: 1.6; font-size: 15px;">Радваме се, че се присъединихте към нашата общност от аудиофили и ценители на истинския, аналогов звук.</p>
+        <p style="color: #ccc; line-height: 1.6; font-size: 15px;">Вече имате достъп до пълните функции на платформата:</p>
+        
+        <ul style="color: #aaa; line-height: 1.8; margin: 20px 0; font-size: 14px;">
+          <li>❤️ Запазване на продукти в <strong>Любими</strong></li>
+          <li>📦 Бързо плащане с предварително запазени данни</li>
+          <li>📊 Пълна история и проследяване на поръчките</li>
+        </ul>
+
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="https://retro-audio-shop.vercel.app/shop" style="background-color: #ff6b00; color: #000; padding: 14px 28px; text-decoration: none; font-weight: 900; border-radius: 6px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; display: inline-block;">Разгледай Каталога</a>
+        </div>
+      </div>
+      
+      <p style="text-align: center; color: #666; font-size: 10px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">© 2026 Retro Audio Shop. Всички права запазени.</p>
+    </div>
+  `;
+
+  await sendBrevoEmail(userEmail, "Добре дошли в Retro Audio Shop! 🎵", htmlContent);
+};
+
+// ОБНОВЕНА: ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА
 const sendOrderConfirmationEmails = async (orderId) => {
   try {
     const orderRes = await pool.query("SELECT * FROM orders WHERE order_id = $1", [orderId]);
@@ -78,21 +110,45 @@ const sendOrderConfirmationEmails = async (orderId) => {
     );
     const items = itemsRes.rows;
 
-    const itemsHtml = items.map(item => 
-      `<li><b>${item.name}</b> - ${item.quantity} бр. x ${item.price_at_purchase} €</li>`
-    ).join("");
+    // Генерираме HTML списък с продуктите
+    const itemsHtml = items.map(item => `
+      <li style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        <strong style="color: #fff;">${item.name}</strong><br/>
+        <span style="color: #aaa; font-size: 12px;">Количество: ${item.quantity} бр. | Цена: ${item.price_at_purchase} €</span>
+      </li>
+    `).join("");
 
+    // Красив HTML шаблон за имейла до клиента
     const emailHtml = `
-      <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; background: #111; color: #fff; border-radius: 10px;">
-        <h1 style="color: #ff6b00; text-transform: uppercase;">Retro Audio Shop</h1>
-        <h2 style="border-bottom: 1px solid #333; padding-bottom: 10px;">Поръчка #${orderId} е приета!</h2>
-        <p>Здравейте, <b>${order.customer_first_name} ${order.customer_last_name}</b>,</p>
-        <p>Благодарим ви за поръчката! Ето детайлите:</p>
-        <ul style="background: #222; padding: 15px 30px; border-radius: 5px;">
-          ${itemsHtml}
-        </ul>
-        <h3 style="color: #ff6b00;">Общо: ${order.total_price} €</h3>
-        <p style="color: #aaa; font-size: 12px;">Ще се свържем с вас скоро за потвърждение на доставката.</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0a0a0a; padding: 40px 20px; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #ff6b00; margin: 0; font-size: 28px; font-style: italic; letter-spacing: -1px; text-transform: uppercase;">RETRO <span style="color: #fff;">AUDIO</span></h1>
+          <p style="color: #ff6b00; font-size: 10px; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase;">Audio Shop</p>
+        </div>
+        
+        <div style="background-color: #18181b; border: 1px solid #333; border-top: 4px solid #ff6b00; border-radius: 8px; padding: 30px;">
+          <h2 style="color: #fff; margin-top: 0;">Здравейте, ${order.customer_first_name}!</h2>
+          <p style="color: #ccc; line-height: 1.6;">Благодарим ви за поръчката. Тя беше успешно приета и вече се обработва от нашия екип.</p>
+          
+          <div style="background-color: #0f0f13; border-radius: 6px; padding: 20px; margin: 25px 0;">
+            <h3 style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0;">Поръчка #${orderId}</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${itemsHtml}
+            </ul>
+            <div style="margin-top: 20px; padding-top: 15px; text-align: right;">
+              <p style="margin: 0; font-size: 14px; color: #888; text-transform: uppercase; font-weight: bold;">Общо за плащане</p>
+              <p style="margin: 0; font-size: 24px; font-weight: bold; color: #ff6b00;">${order.total_price} €</p>
+            </div>
+          </div>
+
+          <p style="color: #ccc; line-height: 1.6;">Ще се свържем с вас съвсем скоро за потвърждение на детайлите по доставката.</p>
+          
+          <div style="text-align: center; margin-top: 35px;">
+            <a href="https://retro-audio-shop.vercel.app/dashboard" style="background-color: #ff6b00; color: #000; padding: 14px 28px; text-decoration: none; font-weight: 900; border-radius: 6px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; display: inline-block;">Проследи поръчката</a>
+          </div>
+        </div>
+        
+        <p style="text-align: center; color: #666; font-size: 10px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">© 2026 Retro Audio Shop. Всички права запазени.</p>
       </div>
     `;
 
@@ -104,7 +160,7 @@ const sendOrderConfirmationEmails = async (orderId) => {
 
     // 1. Имейл до клиента (ако е регистриран)
     if (customerEmail) {
-        await sendBrevoEmail(customerEmail, `Потвърждение на поръчка #${orderId}`, emailHtml);
+        await sendBrevoEmail(customerEmail, `Успешна поръчка #${orderId} от Retro Audio Shop`, emailHtml);
     }
 
     // 2. Имейл до теб (Админа)
@@ -150,6 +206,10 @@ app.post("/auth/register", async (req, res) => {
     );
 
     const token = jwt.sign({ user_id: newUser.rows[0].user_id }, process.env.JWT_SECRET || "secret_key", { expiresIn: "1h" });
+    
+    // НОВО: ПРАЩАМЕ WELCOME ИМЕЙЛ
+    sendWelcomeEmail(email, first_name).catch(console.error);
+
     res.json({ token, role: "user" });
   } catch (err) {
     console.error(err.message);
@@ -287,7 +347,6 @@ app.get("/products/:id", async (req, res) => {
 
 app.post("/orders", async (req, res) => {
   try {
-    // Взимаме само customer и items. Игнорираме 'total' от фронтенда напълно!
     const { customer, items } = req.body; 
     const token = req.header("token");
     let userId = null;
@@ -299,14 +358,12 @@ app.post("/orders", async (req, res) => {
       } catch (err) { console.log("Guest order."); }
     }
 
-    await pool.query("BEGIN"); // Започваме транзакция (ако нещо гръмне, нищо не се записва)
+    await pool.query("BEGIN"); 
 
     let calculatedTotal = 0;
     const validItems = [];
 
-    // ПРОВЕРКА 1 и 2: Проверяваме наличност и цена директно от базата данни
     for (const item of items) {
-      // FOR UPDATE заключва реда, за да не може друг да го купи в същата милисекунда
       const productRes = await pool.query("SELECT price, stock FROM products WHERE product_id = $1 FOR UPDATE", [item.product_id]);
       
       if (productRes.rows.length === 0) {
@@ -319,19 +376,17 @@ app.post("/orders", async (req, res) => {
         throw new Error(`Няма достатъчно наличност за един или повече продукти.`);
       }
 
-      // Смятаме тотала с ИСТИНСКАТА цена от базата
       calculatedTotal += Number(dbProduct.price) * item.quantity;
       
       validItems.push({
         product_id: item.product_id,
         quantity: item.quantity,
-        price: dbProduct.price // Запазваме истинската цена за историята на поръчката
+        price: dbProduct.price 
       });
     }
 
     const initialStatus = customer.paymentMethod === 'card' ? 'awaiting_payment' : 'new';
     
-    // Записваме поръчката с нашия calculatedTotal
     const newOrder = await pool.query(
       `INSERT INTO orders (customer_first_name, customer_last_name, customer_phone, customer_city, customer_address, total_price, payment_method, user_id, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING order_id`,
       [customer.firstName, customer.lastName, customer.phone, customer.city, customer.address, calculatedTotal, customer.paymentMethod || 'cod', userId, initialStatus]
@@ -339,20 +394,18 @@ app.post("/orders", async (req, res) => {
 
     const orderId = newOrder.rows[0].order_id;
     
-    // Намаляваме наличностите и записваме продуктите в поръчката
     for (const item of validItems) {
       await pool.query(`INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES ($1, $2, $3, $4)`, [orderId, item.product_id, item.quantity, item.price]);
       await pool.query("UPDATE products SET stock = stock - $1 WHERE product_id = $2", [item.quantity, item.product_id]);
     }
     
-    await pool.query("COMMIT"); // Всичко е точно, запазваме промените завинаги
+    await pool.query("COMMIT"); 
 
     if (initialStatus === 'new') sendOrderConfirmationEmails(orderId);
     
-    // Връщаме отговор
     res.json({ message: "Успешна поръчка!", orderId });
   } catch (err) {
-    await pool.query("ROLLBACK"); // Ако нещо се обърка (няма наличност), връщаме всичко назад
+    await pool.query("ROLLBACK"); 
     console.error(err.message);
     res.status(400).json({ error: err.message || "Грешка при обработка на поръчката." });
   }
