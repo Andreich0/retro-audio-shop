@@ -31,11 +31,10 @@ app.use("/uploads", express.static("uploads"));
 //              BREVO API (ИМЕЙЛИ)
 // ==========================================
 
-// Универсална функция за изпращане на имейли през Brevo
 const sendBrevoEmail = async (toEmail, subject, htmlContent, replyToEmail = null) => {
   try {
     const bodyData = {
-      sender: { name: "Retro Audio Shop", email: "retroaudio.sales@gmail.com" }, // Твоят верифициран имейл в Brevo
+      sender: { name: "Retro Audio Shop", email: "retroaudio.sales@gmail.com" },
       to: [{ email: toEmail }],
       subject: subject,
       htmlContent: htmlContent
@@ -66,89 +65,94 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent, replyToEmail = null
   }
 };
 
-// НОВО: ФУНКЦИЯ ЗА WELCOME ИМЕЙЛ (ПРИ РЕГИСТРАЦИЯ)
+// НОВО: ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ РЕГИСТРАЦИЯ (WELCOME)
 const sendWelcomeEmail = async (userEmail, firstName) => {
   const htmlContent = `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0a0a0a; padding: 40px 20px; border-radius: 12px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #ff6b00; margin: 0; font-size: 28px; font-style: italic; letter-spacing: -1px; text-transform: uppercase;">RETRO <span style="color: #fff;">AUDIO</span></h1>
-        <p style="color: #ff6b00; font-size: 10px; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase;">Audio Shop</p>
-      </div>
-      
-      <div style="background-color: #18181b; border: 1px solid #333; border-top: 4px solid #ff6b00; border-radius: 8px; padding: 30px;">
-        <h2 style="color: #fff; margin-top: 0;">Добре дошли, ${firstName}! 🎧</h2>
-        <p style="color: #ccc; line-height: 1.6; font-size: 15px;">Радваме се, че се присъединихте към нашата общност от аудиофили и ценители на истинския, аналогов звук.</p>
-        <p style="color: #ccc; line-height: 1.6; font-size: 15px;">Вече имате достъп до пълните функции на платформата:</p>
-        
-        <ul style="color: #aaa; line-height: 1.8; margin: 20px 0; font-size: 14px;">
-          <li>❤️ Запазване на продукти в <strong>Любими</strong></li>
-          <li>📦 Бързо плащане с предварително запазени данни</li>
-          <li>📊 Пълна история и проследяване на поръчките</li>
-        </ul>
-
-        <div style="text-align: center; margin-top: 40px;">
-          <a href="https://retro-audio-shop.vercel.app/shop" style="background-color: #ff6b00; color: #000; padding: 14px 28px; text-decoration: none; font-weight: 900; border-radius: 6px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; display: inline-block;">Разгледай Каталога</a>
+    <div style="font-family: Arial, sans-serif; background-color: #0a0a0a; padding: 40px 15px;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #18181b; border: 1px solid #333; border-top: 4px solid #ff6b00; border-radius: 12px; overflow: hidden;">
+        <div style="text-align: center; padding: 30px 20px; border-bottom: 1px solid #333;">
+           <h1 style="color: #ff6b00; margin: 0; font-size: 28px; font-style: italic; letter-spacing: -1px; text-transform: uppercase;">RETRO <span style="color: #fff;">AUDIO</span></h1>
+        </div>
+        <div style="padding: 30px 20px;">
+           <h2 style="color: #fff; margin-top: 0;">Добре дошли, ${firstName}! 🎧</h2>
+           <p style="color: #ccc; line-height: 1.6;">Радваме се, че се присъединихте към нашата общност от аудиофили и ценители на истинския, аналогов звук.</p>
+           <p style="color: #ccc; line-height: 1.6;">Вече имате достъп до пълните функции на платформата:</p>
+           <ul style="color: #aaa; line-height: 1.8; margin: 20px 0; font-size: 14px;">
+             <li>❤️ Запазване на продукти в <strong>Любими</strong></li>
+             <li>📦 Бързо плащане с предварително запазени данни</li>
+             <li>📊 Пълна история и проследяване на поръчките</li>
+           </ul>
+           <div style="text-align: center; margin-top: 40px;">
+             <a href="https://retro-audio-shop.vercel.app/shop" style="background-color: #ff6b00; color: #000; padding: 14px 28px; text-decoration: none; font-weight: bold; border-radius: 6px; text-transform: uppercase; font-size: 12px; display: inline-block;">Разгледай Каталога</a>
+           </div>
         </div>
       </div>
-      
-      <p style="text-align: center; color: #666; font-size: 10px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">© 2026 Retro Audio Shop. Всички права запазени.</p>
+      <p style="text-align: center; color: #666; font-size: 10px; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">© 2026 Retro Audio Shop. Всички права запазени.</p>
     </div>
   `;
 
   await sendBrevoEmail(userEmail, "Добре дошли в Retro Audio Shop! 🎵", htmlContent);
 };
 
-// ОБНОВЕНА: ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА
+// ОБНОВЕНА: ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА (СЪС СНИМКИ И ЛИНКОВЕ)
 const sendOrderConfirmationEmails = async (orderId) => {
   try {
     const orderRes = await pool.query("SELECT * FROM orders WHERE order_id = $1", [orderId]);
     const order = orderRes.rows[0];
 
+    // ДОБАВИХМЕ p.image_url и p.product_id в заявката, за да имаме снимки и линкове
     const itemsRes = await pool.query(
-      "SELECT p.name, oi.quantity, oi.price_at_purchase FROM order_items oi JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id = $1",
+      "SELECT p.product_id, p.name, p.image_url, oi.quantity, oi.price_at_purchase FROM order_items oi JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id = $1",
       [orderId]
     );
     const items = itemsRes.rows;
 
-    // Генерираме HTML списък с продуктите
+    // Генерираме HTML списък с продуктите (като таблица, за да се вижда добре в Gmail)
     const itemsHtml = items.map(item => `
-      <li style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-        <strong style="color: #fff;">${item.name}</strong><br/>
-        <span style="color: #aaa; font-size: 12px;">Количество: ${item.quantity} бр. | Цена: ${item.price_at_purchase} €</span>
-      </li>
+      <tr>
+        <td style="padding: 15px 0; border-bottom: 1px solid #333;" width="70">
+          <img src="${item.image_url}" alt="${item.name}" width="60" height="60" style="border-radius: 4px; object-fit: contain; background: #fff; padding: 2px; display: block;" />
+        </td>
+        <td style="padding: 15px 10px; border-bottom: 1px solid #333;">
+          <a href="https://retro-audio-shop.vercel.app/shop/${item.product_id}" style="color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">${item.name}</a>
+          <br/>
+          <span style="color: #888888; font-size: 12px;">Количество: ${item.quantity} бр.</span>
+        </td>
+        <td style="padding: 15px 0; border-bottom: 1px solid #333; text-align: right; color: #ff6b00; font-weight: bold; font-size: 16px;">
+          ${item.price_at_purchase} €
+        </td>
+      </tr>
     `).join("");
 
-    // Красив HTML шаблон за имейла до клиента
     const emailHtml = `
-      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0a0a0a; padding: 40px 20px; border-radius: 12px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #ff6b00; margin: 0; font-size: 28px; font-style: italic; letter-spacing: -1px; text-transform: uppercase;">RETRO <span style="color: #fff;">AUDIO</span></h1>
-          <p style="color: #ff6b00; font-size: 10px; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase;">Audio Shop</p>
-        </div>
-        
-        <div style="background-color: #18181b; border: 1px solid #333; border-top: 4px solid #ff6b00; border-radius: 8px; padding: 30px;">
-          <h2 style="color: #fff; margin-top: 0;">Здравейте, ${order.customer_first_name}!</h2>
-          <p style="color: #ccc; line-height: 1.6;">Благодарим ви за поръчката. Тя беше успешно приета и вече се обработва от нашия екип.</p>
-          
-          <div style="background-color: #0f0f13; border-radius: 6px; padding: 20px; margin: 25px 0;">
-            <h3 style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0;">Поръчка #${orderId}</h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              ${itemsHtml}
-            </ul>
-            <div style="margin-top: 20px; padding-top: 15px; text-align: right;">
-              <p style="margin: 0; font-size: 14px; color: #888; text-transform: uppercase; font-weight: bold;">Общо за плащане</p>
-              <p style="margin: 0; font-size: 24px; font-weight: bold; color: #ff6b00;">${order.total_price} €</p>
-            </div>
+      <div style="font-family: Arial, sans-serif; background-color: #0a0a0a; padding: 40px 15px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #18181b; border: 1px solid #333; border-top: 4px solid #ff6b00; border-radius: 12px; overflow: hidden;">
+          <div style="text-align: center; padding: 30px 20px; border-bottom: 1px solid #333;">
+             <h1 style="color: #ff6b00; margin: 0; font-size: 28px; font-style: italic; letter-spacing: -1px; text-transform: uppercase;">RETRO <span style="color: #fff;">AUDIO</span></h1>
           </div>
-
-          <p style="color: #ccc; line-height: 1.6;">Ще се свържем с вас съвсем скоро за потвърждение на детайлите по доставката.</p>
-          
-          <div style="text-align: center; margin-top: 35px;">
-            <a href="https://retro-audio-shop.vercel.app/dashboard" style="background-color: #ff6b00; color: #000; padding: 14px 28px; text-decoration: none; font-weight: 900; border-radius: 6px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; display: inline-block;">Проследи поръчката</a>
+          <div style="padding: 30px 20px;">
+             <h2 style="color: #fff; margin-top: 0;">Здравейте, ${order.customer_first_name}!</h2>
+             <p style="color: #ccc; line-height: 1.6;">Благодарим ви за поръчката. Тя беше успешно приета и вече се обработва от нашия екип.</p>
+             
+             <h3 style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px;">Детайли за Поръчка #${orderId}</h3>
+             
+             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+               ${itemsHtml}
+             </table>
+             
+             <div style="text-align: right; padding-top: 15px;">
+               <p style="margin: 0; font-size: 12px; color: #888; text-transform: uppercase; font-weight: bold;">Общо за плащане</p>
+               <p style="margin: 0; font-size: 24px; font-weight: bold; color: #ff6b00;">${order.total_price} €</p>
+             </div>
+             
+             <div style="margin-top: 40px; background: #0f0f13; padding: 25px 20px; border-radius: 8px; text-align: center; border: 1px solid #333;">
+               <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">Имате въпроси или желаете промяна?</p>
+               <a href="https://retro-audio-shop.vercel.app/contact" style="background-color: #ff6b00; color: #000; padding: 10px 20px; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 12px; text-transform: uppercase;">Свържете се с нас</a>
+               <p style="color: #666; font-size: 12px; margin-top: 15px;">или директно върнете отговор на този имейл.</p>
+             </div>
           </div>
         </div>
-        
-        <p style="text-align: center; color: #666; font-size: 10px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">© 2026 Retro Audio Shop. Всички права запазени.</p>
+        <p style="text-align: center; color: #666; font-size: 10px; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">© 2026 Retro Audio Shop. Всички права запазени.</p>
       </div>
     `;
 
@@ -158,12 +162,10 @@ const sendOrderConfirmationEmails = async (orderId) => {
         if (userRes.rows.length > 0) customerEmail = userRes.rows[0].email;
     }
 
-    // 1. Имейл до клиента (ако е регистриран)
     if (customerEmail) {
-        await sendBrevoEmail(customerEmail, `Успешна поръчка #${orderId} от Retro Audio Shop`, emailHtml);
+        await sendBrevoEmail(customerEmail, `Потвърждение на поръчка #${orderId} от Retro Audio Shop`, emailHtml);
     }
 
-    // 2. Имейл до теб (Админа)
     const adminHtml = `
       <p>Имаш нова поръчка от <b>${order.customer_first_name} ${order.customer_last_name}</b>.</p>
       <p>Телефон: ${order.customer_phone}</p>
@@ -207,7 +209,8 @@ app.post("/auth/register", async (req, res) => {
 
     const token = jwt.sign({ user_id: newUser.rows[0].user_id }, process.env.JWT_SECRET || "secret_key", { expiresIn: "1h" });
     
-    // НОВО: ПРАЩАМЕ WELCOME ИМЕЙЛ
+    // ПРАЩАМЕ WELCOME ИМЕЙЛ
+    console.log(`Изпращане на Welcome имейл до ${email}...`);
     sendWelcomeEmail(email, first_name).catch(console.error);
 
     res.json({ token, role: "user" });
@@ -292,7 +295,6 @@ app.post("/auth/forgot-password", async (req, res) => {
       </div>
     `;
 
-    // Пращане през Brevo
     await sendBrevoEmail(email, "Възстановяване на парола", htmlContent);
 
     res.json("Ако този имейл съществува, сме изпратили линк.");
@@ -643,9 +645,7 @@ app.post("/contact", async (req, res) => {
       </div>
     `;
     
-    // Пращаме го на себе си (админа), като слагаме reply-to да е имейла на клиента
     await sendBrevoEmail("retroaudio.sales@gmail.com", `Ново запитване от сайта: ${name}`, htmlContent, email);
-    
     res.json("Съобщението е изпратено успешно!");
   } catch (err) { res.status(500).json("Възникна грешка при изпращането."); }
 });
