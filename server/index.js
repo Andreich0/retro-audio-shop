@@ -352,12 +352,24 @@ app.post("/orders", async (req, res) => {
     const token = req.header("token");
     let userId = null;
 
+    // 1. Проверяваме дали потребителят е логнат (има валиден token)
     if (token) {
       try {
         const payload = jwt.verify(token, process.env.JWT_SECRET || "secret_key");
         userId = payload.user_id;
       } catch (err) { console.log("Guest order."); }
     }
+
+    // --- НОВАТА ЛОГИКА Е ТУК ---
+    // 2. Ако не е логнат (userId е null), но е въвел имейл, 
+    // проверяваме дали този имейл има регистрация в сайта.
+    if (!userId && customer.email) {
+        const userCheck = await pool.query("SELECT user_id FROM users WHERE email = $1", [customer.email]);
+        if (userCheck.rows.length > 0) {
+            userId = userCheck.rows[0].user_id; // Намерихме го! Вързваме поръчката към профила му.
+        }
+    }
+    // ---------------------------
 
     await pool.query("BEGIN"); 
 
@@ -388,7 +400,6 @@ app.post("/orders", async (req, res) => {
 
     const initialStatus = customer.paymentMethod === 'card' ? 'awaiting_payment' : 'new';
     
-    // --- ПРОМЯНАТА Е ТУК: ВКАРВАМЕ ИМЕЙЛА В БАЗАТА ---
     const newOrder = await pool.query(
       `INSERT INTO orders (customer_first_name, customer_last_name, customer_email, customer_phone, customer_city, customer_address, total_price, payment_method, user_id, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING order_id`,
       [customer.firstName, customer.lastName, customer.email, customer.phone, customer.city, customer.address, calculatedTotal, customer.paymentMethod || 'cod', userId, initialStatus]
