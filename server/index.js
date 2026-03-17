@@ -287,7 +287,8 @@ app.get("/products/:id", async (req, res) => {
 
 app.post("/orders", async (req, res) => {
   try {
-    const { customer, items, total } = req.body;
+    // Взимаме само customer и items. Игнорираме 'total' от фронтенда напълно!
+    const { customer, items } = req.body; 
     const token = req.header("token");
     let userId = null;
 
@@ -298,26 +299,62 @@ app.post("/orders", async (req, res) => {
       } catch (err) { console.log("Guest order."); }
     }
 
-    await pool.query("BEGIN");
+    await pool.query("BEGIN"); // Започваме транзакция (ако нещо гръмне, нищо не се записва)
+
+    let calculatedTotal = 0;
+    const validItems = [];
+
+    // ПРОВЕРКА 1 и 2: Проверяваме наличност и цена директно от базата данни
+    for (const item of items) {
+      // FOR UPDATE заключва реда, за да не може друг да го купи в същата милисекунда
+      const productRes = await pool.query("SELECT price, stock FROM products WHERE product_id = $1 FOR UPDATE", [item.product_id]);
+      
+      if (productRes.rows.length === 0) {
+        throw new Error(`Продуктът не е намерен.`);
+      }
+
+      const dbProduct = productRes.rows[0];
+
+      if (dbProduct.stock < item.quantity) {
+        throw new Error(`Няма достатъчно наличност за един или повече продукти.`);
+      }
+
+      // Смятаме тотала с ИСТИНСКАТА цена от базата
+      calculatedTotal += Number(dbProduct.price) * item.quantity;
+      
+      validItems.push({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: dbProduct.price // Запазваме истинската цена за историята на поръчката
+      });
+    }
+
     const initialStatus = customer.paymentMethod === 'card' ? 'awaiting_payment' : 'new';
+    
+    // Записваме поръчката с нашия calculatedTotal
     const newOrder = await pool.query(
       `INSERT INTO orders (customer_first_name, customer_last_name, customer_phone, customer_city, customer_address, total_price, payment_method, user_id, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING order_id`,
-      [customer.firstName, customer.lastName, customer.phone, customer.city, customer.address, total, customer.paymentMethod || 'cod', userId, initialStatus]
+      [customer.firstName, customer.lastName, customer.phone, customer.city, customer.address, calculatedTotal, customer.paymentMethod || 'cod', userId, initialStatus]
     );
 
     const orderId = newOrder.rows[0].order_id;
-    for (const item of items) {
+    
+    // Намаляваме наличностите и записваме продуктите в поръчката
+    for (const item of validItems) {
       await pool.query(`INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES ($1, $2, $3, $4)`, [orderId, item.product_id, item.quantity, item.price]);
       await pool.query("UPDATE products SET stock = stock - $1 WHERE product_id = $2", [item.quantity, item.product_id]);
     }
-    await pool.query("COMMIT");
+    
+    await pool.query("COMMIT"); // Всичко е точно, запазваме промените завинаги
 
     if (initialStatus === 'new') sendOrderConfirmationEmails(orderId);
+    
+    // Връщаме отговор
     res.json({ message: "Успешна поръчка!", orderId });
   } catch (err) {
-    await pool.query("ROLLBACK");
+    await pool.query("ROLLBACK"); // Ако нещо се обърка (няма наличност), връщаме всичко назад
     console.error(err.message);
-    res.status(500).json({ error: "Server Error" });
+    res.status(400).json({ error: err.message || "Грешка при обработка на поръчката." });
   }
 });
 
