@@ -65,15 +65,15 @@ export default function Footer() {
             <ul className="space-y-4 text-sm">
               <li className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
                 <MapPin size={20} className="text-[#ff6b00] sm:mt-1 shrink-0" />
-                <span>гр. София, бул. "Витоша" 15<br className="hidden sm:block"/>(Шоурум RetroAudio)</span>
+                <span>гр. Варна, ул. "Роза" 25<br className="hidden sm:block"/>(Шоурум RetroAudio)</span>
               </li>
               <li className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                 <Phone size={20} className="text-[#ff6b00] shrink-0" />
-                <span>+359 888 123 456</span>
+                <span>+359 899 857 944</span>
               </li>
               <li className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                 <Mail size={20} className="text-[#ff6b00] shrink-0" />
-                <span>sales@retroaudio.bg</span>
+                <span>retroaudio.sales@gmail.com</span>
               </li>
             </ul>
           </div>

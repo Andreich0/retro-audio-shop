@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Jura } from "next/font/google"; 
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; // <--- 1. Импортираме новия футър
+import Footer from "./components/Footer"; 
+import CookieBanner from "./components/CookieBanner";
 import { AuthProvider } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
 
@@ -34,10 +35,12 @@ export default function RootLayout({
               {children}
             </main>
             
-            <Footer /> {/* <--- 2. Тук слагаме компонента */}
+            <Footer /> 
 
           </CartProvider>
         </AuthProvider>
+        
+        <CookieBanner />
       </body>
     </html>
   );

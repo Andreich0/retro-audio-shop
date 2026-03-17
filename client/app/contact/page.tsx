@@ -70,7 +70,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Адрес на сервиза</p>
-                    <p className="text-white font-bold">гр. Варна, ул. Роза 25</p>
+                    <p className="text-white font-bold">гр. Варна, ул. "Роза" 25</p>
                   </div>
                 </div>
 
@@ -80,7 +80,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Телефон</p>
-                    <p className="text-white font-bold font-mono">+359 888 123 456</p>
+                    <p className="text-white font-bold font-mono">+359 899 857 944</p>
                   </div>
                 </div>
 
@@ -90,7 +90,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Имейл адрес</p>
-                    <p className="text-white font-bold font-mono">info@retroaudio.bg</p>
+                    <p className="text-white font-bold font-mono">retroaudio.sales@gmail.com</p>
                   </div>
                 </div>
               </div>
