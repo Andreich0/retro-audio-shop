@@ -65,7 +65,6 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent, replyToEmail = null
   }
 };
 
-// НОВО: ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ РЕГИСТРАЦИЯ (WELCOME)
 const sendWelcomeEmail = async (userEmail, firstName) => {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; background-color: #0a0a0a; padding: 40px 15px;">
@@ -94,20 +93,17 @@ const sendWelcomeEmail = async (userEmail, firstName) => {
   await sendBrevoEmail(userEmail, "Добре дошли в Retro Audio Shop! 🎵", htmlContent);
 };
 
-// ОБНОВЕНА: ФУНКЦИЯ ЗА ИМЕЙЛ ПРИ ПОРЪЧКА (СЪС СНИМКИ И ЛИНКОВЕ)
 const sendOrderConfirmationEmails = async (orderId) => {
   try {
     const orderRes = await pool.query("SELECT * FROM orders WHERE order_id = $1", [orderId]);
     const order = orderRes.rows[0];
 
-    // ДОБАВИХМЕ p.image_url и p.product_id в заявката, за да имаме снимки и линкове
     const itemsRes = await pool.query(
       "SELECT p.product_id, p.name, p.image_url, oi.quantity, oi.price_at_purchase FROM order_items oi JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id = $1",
       [orderId]
     );
     const items = itemsRes.rows;
 
-    // Генерираме HTML списък с продуктите (като таблица, за да се вижда добре в Gmail)
     const itemsHtml = items.map(item => `
       <tr>
         <td style="padding: 15px 0; border-bottom: 1px solid #333;" width="70">
@@ -156,8 +152,11 @@ const sendOrderConfirmationEmails = async (orderId) => {
       </div>
     `;
 
-    let customerEmail = null;
-    if (order.user_id) {
+    // --- ПРОМЯНАТА Е ТУК: ВЗИМАМЕ ИМЕЙЛА ДИРЕКТНО ОТ ПОРЪЧКАТА ---
+    let customerEmail = order.customer_email;
+    
+    // Ако е стара поръчка без имейл, търсим го в users таблицата
+    if (!customerEmail && order.user_id) {
         const userRes = await pool.query("SELECT email FROM users WHERE user_id = $1", [order.user_id]);
         if (userRes.rows.length > 0) customerEmail = userRes.rows[0].email;
     }
@@ -168,6 +167,7 @@ const sendOrderConfirmationEmails = async (orderId) => {
 
     const adminHtml = `
       <p>Имаш нова поръчка от <b>${order.customer_first_name} ${order.customer_last_name}</b>.</p>
+      <p>Имейл: ${customerEmail || "Няма"}</p>
       <p>Телефон: ${order.customer_phone}</p>
       <p>Стойност: ${order.total_price} €</p>
       <p>Влез в Админ панела за повече детайли.</p>
@@ -209,7 +209,6 @@ app.post("/auth/register", async (req, res) => {
 
     const token = jwt.sign({ user_id: newUser.rows[0].user_id }, process.env.JWT_SECRET || "secret_key", { expiresIn: "1h" });
     
-    // ПРАЩАМЕ WELCOME ИМЕЙЛ
     console.log(`Изпращане на Welcome имейл до ${email}...`);
     sendWelcomeEmail(email, first_name).catch(console.error);
 
@@ -389,9 +388,10 @@ app.post("/orders", async (req, res) => {
 
     const initialStatus = customer.paymentMethod === 'card' ? 'awaiting_payment' : 'new';
     
+    // --- ПРОМЯНАТА Е ТУК: ВКАРВАМЕ ИМЕЙЛА В БАЗАТА ---
     const newOrder = await pool.query(
-      `INSERT INTO orders (customer_first_name, customer_last_name, customer_phone, customer_city, customer_address, total_price, payment_method, user_id, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING order_id`,
-      [customer.firstName, customer.lastName, customer.phone, customer.city, customer.address, calculatedTotal, customer.paymentMethod || 'cod', userId, initialStatus]
+      `INSERT INTO orders (customer_first_name, customer_last_name, customer_email, customer_phone, customer_city, customer_address, total_price, payment_method, user_id, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING order_id`,
+      [customer.firstName, customer.lastName, customer.email, customer.phone, customer.city, customer.address, calculatedTotal, customer.paymentMethod || 'cod', userId, initialStatus]
     );
 
     const orderId = newOrder.rows[0].order_id;
