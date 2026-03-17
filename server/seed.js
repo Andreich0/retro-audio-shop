@@ -7,10 +7,10 @@ const generateProducts = () => {
   
   // Яки реални снимки от Unsplash, отговарящи на категориите
   const images = {
-    "Deck": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1000&auto=format&fit=crop",
-    "Cassette": "https://images.unsplash.com/photo-1514534720935-716b9b32ff30?q=80&w=1000&auto=format&fit=crop",
-    "Walkman": "https://images.unsplash.com/photo-1618314115160-5f21226dd18c?q=80&w=1000&auto=format&fit=crop",
-    "Accessory": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop"
+    "Deck": "https://media.istockphoto.com/id/667969950/photo/cassette-player-stereo-in-retro-style.jpg?s=612x612&w=0&k=20&c=3qOGQaD0BzW6Yx6i_AZnt_HcxqUuGunzdiYaqsW3amc=",
+    "Cassette": "https://plus.unsplash.com/premium_photo-1682125848355-4fb0e6da7647?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "Walkman": "https://media.istockphoto.com/id/1013208258/photo/retro-cassette-tape-with-headphones.jpg?s=612x612&w=0&k=20&c=TMYUbBLWOQbZo_aXL_9XVhsFQxiWz2a_vHoa7g5Bmz4=",
+    "Accessory": "https://thumbs.dreamstime.com/b/retro-music-still-life-high-angle-shot-style-accessories-items-include-vinyl-lp-rpm-single-headphones-guitar-case-41667398.jpg"
   };
 
   const products = [];
