@@ -270,14 +270,14 @@ export default function Dashboard() {
     .filter(order => order.status !== 'awaiting_payment' && order.status !== 'cancelled')
     .reduce((acc, order) => acc + Number(order.total_price), 0);
 
-  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff6b00]"></div></div>;
+  if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-[#ff6b00] font-bold tracking-widest uppercase animate-pulse text-xs md:text-sm">Зареждане...</div>;
 
   if (error) return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white p-4 text-center">
         <AlertTriangle className="text-red-500 mb-4" size={48} />
         <h2 className="text-xl font-bold mb-2">Възникна грешка</h2>
         <p className="text-gray-400 mb-6">{error}</p>
-        <button onClick={logout} className="bg-[#18181b] px-6 py-2 rounded border border-[#333] hover:bg-red-900/20 hover:text-red-500">Изход и нов вход</button>
+        <button onClick={logout} className="bg-[#18181b] px-6 py-2 rounded border border-[#333] hover:bg-red-900/20 hover:text-red-500 transition-colors uppercase tracking-widest text-xs font-bold">Изход и нов вход</button>
     </div>
   );
 
@@ -295,6 +295,15 @@ export default function Dashboard() {
           </div>
           
           <div className="flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
+             {/* Admin Button Link (Only if user is admin) */}
+             {(user?.role === 'admin' || user?.role === 'superadmin') && (
+               <Link href="/admin/orders" className="flex-1 md:flex-none">
+                 <button className="w-full flex items-center justify-center gap-2 bg-[#ff6b00]/10 text-[#ff6b00] hover:bg-[#ff6b00] hover:text-black transition-all px-4 md:px-5 py-2.5 rounded border border-[#ff6b00]/30 font-bold text-[10px] md:text-xs uppercase tracking-widest">
+                   <ShieldCheck size={16} /> Админ
+                 </button>
+               </Link>
+             )}
+
              <button 
                 onClick={() => setIsPasswordModalOpen(true)}
                 className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#18181b] hover:bg-[#ff6b00]/10 hover:text-[#ff6b00] hover:border-[#ff6b00] transition-all px-4 md:px-5 py-2.5 rounded border border-gray-700 font-bold text-[10px] md:text-xs uppercase tracking-widest"
@@ -313,14 +322,14 @@ export default function Dashboard() {
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          <div className="bg-[#18181b] p-5 md:p-6 rounded-xl border border-gray-800">
+          <div className="bg-[#18181b] p-5 md:p-6 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors">
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-[#ff6b00]/10 rounded text-[#ff6b00]">
                 <User size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
                 <p className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Потребител</p>
-                <h3 className="text-base md:text-lg font-bold">
+                <h3 className="text-base md:text-lg font-bold truncate pr-2">
                     {user ? `${user.first_name} ${user.last_name}` : "Зареждане..."}
                 </h3>
               </div>
@@ -330,7 +339,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-[#18181b] p-5 md:p-6 rounded-xl border border-gray-800">
+          <div className="bg-[#18181b] p-5 md:p-6 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-500/10 rounded text-blue-500">
                 <Package size={20} className="md:w-6 md:h-6" />
@@ -342,7 +351,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-[#18181b] p-5 md:p-6 rounded-xl border border-gray-800 sm:col-span-2 md:col-span-1">
+          <div className="bg-[#18181b] p-5 md:p-6 rounded-xl border border-gray-800 sm:col-span-2 md:col-span-1 hover:border-gray-700 transition-colors">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-green-500/10 rounded text-green-500">
                 <CreditCard size={20} className="md:w-6 md:h-6" />
@@ -377,28 +386,28 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Име</label>
-                    <input type="text" required value={profileData.first_name} onChange={(e) => setProfileData({...profileData, first_name: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] outline-none text-sm" />
+                    <input type="text" required value={profileData.first_name} onChange={(e) => setProfileData({...profileData, first_name: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none text-sm transition-all" />
                 </div>
                 <div className="space-y-1">
                     <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Фамилия</label>
-                    <input type="text" required value={profileData.last_name} onChange={(e) => setProfileData({...profileData, last_name: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] outline-none text-sm" />
+                    <input type="text" required value={profileData.last_name} onChange={(e) => setProfileData({...profileData, last_name: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none text-sm transition-all" />
                 </div>
                 <div className="space-y-1">
                     <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Телефон</label>
-                    <input type="tel" placeholder="Напр. 0888123456" value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] outline-none font-mono text-sm" />
+                    <input type="tel" placeholder="Напр. 0888123456" value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none font-mono text-sm transition-all" />
                 </div>
                 <div className="space-y-1">
                     <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Град</label>
-                    <input type="text" placeholder="Напр. София" value={profileData.city} onChange={(e) => setProfileData({...profileData, city: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] outline-none text-sm" />
+                    <input type="text" placeholder="Напр. София" value={profileData.city} onChange={(e) => setProfileData({...profileData, city: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none text-sm transition-all" />
                 </div>
                 <div className="sm:col-span-2 space-y-1">
                     <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Точен Адрес</label>
-                    <input type="text" placeholder="ж.к. Младост, ул. Примерна 12" value={profileData.address} onChange={(e) => setProfileData({...profileData, address: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] outline-none text-sm" />
+                    <input type="text" placeholder="ж.к. Младост, ул. Примерна 12" value={profileData.address} onChange={(e) => setProfileData({...profileData, address: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-800 p-3 rounded-lg text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none text-sm transition-all" />
                 </div>
               </div>
               
               {profileMessage.text && (
-                <div className={`text-[10px] md:text-xs font-bold p-3 rounded text-center uppercase tracking-widest ${profileMessage.type === 'error' ? 'bg-red-900/20 text-red-500' : 'bg-green-900/20 text-green-500'}`}>
+                <div className={`text-[10px] md:text-xs font-bold p-3 rounded text-center uppercase tracking-widest ${profileMessage.type === 'error' ? 'bg-red-900/20 text-red-500 border border-red-900/30' : 'bg-green-900/20 text-green-500 border border-green-900/30'}`}>
                     {profileMessage.text}
                 </div>
               )}
@@ -410,19 +419,19 @@ export default function Dashboard() {
               </div>
             </form>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-fadeIn">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-fadeIn bg-black/20 p-4 md:p-5 rounded-lg border border-gray-800/50">
                 <div>
-                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-600 tracking-widest mb-1">Имена</p>
-                    <p className="font-bold text-white text-sm flex items-center gap-2"><User size={14} className="text-gray-500 shrink-0"/> <span className="truncate">{user?.first_name} {user?.last_name}</span></p>
+                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1.5">Имена</p>
+                    <p className="font-bold text-white text-sm flex items-center gap-2"><User size={14} className="text-[#ff6b00] shrink-0"/> <span className="truncate">{user?.first_name} {user?.last_name}</span></p>
                 </div>
                 <div>
-                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-600 tracking-widest mb-1">Телефон</p>
-                    <p className="font-bold text-white text-sm flex items-center gap-2"><Phone size={14} className="text-gray-500 shrink-0"/> {user?.phone || <span className="text-gray-600 italic font-normal">Не е въведен</span>}</p>
+                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1.5">Телефон</p>
+                    <p className="font-bold text-white text-sm flex items-center gap-2"><Phone size={14} className="text-[#ff6b00] shrink-0"/> {user?.phone || <span className="text-gray-600 italic font-normal text-xs">Не е въведен</span>}</p>
                 </div>
                 <div className="sm:col-span-2 md:col-span-2">
-                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-600 tracking-widest mb-1">Адрес за доставка</p>
-                    <p className="font-bold text-white text-sm flex items-start gap-2"><MapPin size={14} className="text-gray-500 shrink-0 mt-1"/> 
-                        <span className="line-clamp-2">{user?.city || user?.address ? `${user?.city ? user.city + ', ' : ''}${user?.address || ''}` : <span className="text-gray-600 italic font-normal">Не е въведен</span>}</span>
+                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1.5">Адрес за доставка</p>
+                    <p className="font-bold text-white text-sm flex items-start gap-2"><MapPin size={14} className="text-[#ff6b00] shrink-0 mt-0.5"/> 
+                        <span className="line-clamp-2 leading-tight">{user?.city || user?.address ? `${user?.city ? user.city + ', ' : ''}${user?.address || ''}` : <span className="text-gray-600 italic font-normal text-xs">Не е въведен адрес</span>}</span>
                     </p>
                 </div>
             </div>
@@ -450,54 +459,54 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="bg-[#18181b] border border-gray-800 rounded-xl overflow-hidden shadow-2xl max-h-[600px] overflow-y-auto custom-scrollbar">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto custom-scrollbar pb-2 md:pb-0">
                 <table className="w-full text-left min-w-[700px]">
-                  <thead className="sticky top-0 bg-gray-900 z-10">
-                    <tr className="bg-gray-800/80 text-gray-400 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-gray-800 backdrop-blur-md">
-                      <th className="p-3 md:p-5">ID</th>
-                      <th className="p-3 md:p-5">Дата</th>
-                      <th className="p-3 md:p-5">Адрес</th>
-                      <th className="p-3 md:p-5">Сума</th>
-                      <th className="p-3 md:p-5">Статус</th>
-                      <th className="p-3 md:p-5 text-right">Детайли</th>
+                  <thead className="sticky top-0 bg-[#0f0f13] z-10 shadow-sm">
+                    <tr className="text-gray-400 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-gray-800">
+                      <th className="p-4 md:p-5">ID</th>
+                      <th className="p-4 md:p-5">Дата</th>
+                      <th className="p-4 md:p-5">Адрес</th>
+                      <th className="p-4 md:p-5">Сума</th>
+                      <th className="p-4 md:p-5">Статус</th>
+                      <th className="p-4 md:p-5 text-right">Детайли</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800 text-xs md:text-sm">
+                  <tbody className="divide-y divide-gray-800/50 text-xs md:text-sm">
                     {orders.map((order) => (
                       <Fragment key={order.order_id}> 
                         <tr 
-                          className={`hover:bg-gray-800/30 transition-colors cursor-pointer ${expandedOrderId === order.order_id ? 'bg-[#ff6b00]/5' : ''}`} 
+                          className={`hover:bg-gray-800/30 transition-colors cursor-pointer group ${expandedOrderId === order.order_id ? 'bg-[#ff6b00]/5' : ''}`} 
                           onClick={() => toggleDetails(order.order_id)}
                         >
-                          <td className="p-3 md:p-5 font-mono text-[#ff6b00] font-bold">#{order.order_id}</td>
-                          <td className="p-3 md:p-5 uppercase whitespace-nowrap">
+                          <td className="p-4 md:p-5 font-mono text-[#ff6b00] font-bold">#{order.order_id}</td>
+                          <td className="p-4 md:p-5 uppercase whitespace-nowrap text-gray-300">
                             {new Date(order.created_at).toLocaleDateString("bg-BG")}
                           </td>
-                          <td className="p-3 md:p-5 text-gray-400 text-[10px] md:text-xs max-w-[120px] md:max-w-[200px]">
-                            <div className="flex items-center gap-1 truncate">
-                              <MapPin size={12} className="shrink-0"/> <span className="truncate">{order.customer_city}, {order.customer_address}</span>
+                          <td className="p-4 md:p-5 text-gray-400 text-[10px] md:text-xs max-w-[150px] md:max-w-[200px]">
+                            <div className="flex items-center gap-1.5 truncate" title={`${order.customer_city}, ${order.customer_address}`}>
+                              <MapPin size={12} className="shrink-0 text-gray-500 group-hover:text-[#ff6b00] transition-colors"/> <span className="truncate">{order.customer_city}, {order.customer_address}</span>
                             </div>
                           </td>
-                          <td className="p-3 md:p-5 font-bold text-white whitespace-nowrap">{Number(order.total_price).toFixed(2)} €</td>
+                          <td className="p-4 md:p-5 font-bold text-white whitespace-nowrap">{Number(order.total_price).toFixed(2)} €</td>
                           
-                          <td className="p-3 md:p-5">
+                          <td className="p-4 md:p-5">
                             <div className="flex flex-col gap-2">
                               <span className={`inline-block w-fit px-2 py-1 rounded text-[9px] font-black uppercase tracking-tighter text-center ${getStatusColor(order.status)}`}>
                                 {getStatusLabel(order.status)}
                               </span>
                               
                               {order.status?.toLowerCase() === 'awaiting_payment' && (
-                                <div className="flex gap-1 mt-1">
+                                <div className="flex gap-1.5 mt-1">
                                     <button
                                       onClick={(e) => handleRetryPayment(order.order_id, e)}
-                                      className="flex-1 text-[9px] bg-[#ff6b00]/10 text-[#ff6b00] border border-[#ff6b00]/30 hover:bg-[#ff6b00] hover:text-black px-1.5 py-1 rounded font-bold uppercase tracking-widest transition-all text-center"
+                                      className="flex-1 text-[9px] bg-[#ff6b00]/10 text-[#ff6b00] border border-[#ff6b00]/30 hover:bg-[#ff6b00] hover:text-black px-1.5 py-1 rounded font-bold uppercase tracking-widest transition-all text-center shadow-sm hover:shadow-[0_0_10px_rgba(255,107,0,0.3)]"
                                       title="Продължи към плащане"
                                     >
                                       Плати
                                     </button>
                                     <button
                                       onClick={(e) => handleCancelUnpaidOrder(order.order_id, e)}
-                                      className="flex-1 text-[9px] bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500 hover:text-white px-1.5 py-1 rounded font-bold uppercase tracking-widest transition-all text-center"
+                                      className="flex-1 text-[9px] bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500 hover:text-white px-1.5 py-1 rounded font-bold uppercase tracking-widest transition-all text-center shadow-sm"
                                       title="Откажи поръчката"
                                     >
                                       Отказ
@@ -507,26 +516,33 @@ export default function Dashboard() {
                             </div>
                           </td>
 
-                          <td className="p-3 md:p-5 text-right">
-                            <ChevronRight size={18} className={`inline transition-transform ${expandedOrderId === order.order_id ? 'rotate-90 text-[#ff6b00]' : 'text-gray-600'}`} />
+                          <td className="p-4 md:p-5 text-right">
+                            <div className={`p-1.5 inline-block rounded-full transition-colors ${expandedOrderId === order.order_id ? 'bg-[#ff6b00]/10' : 'group-hover:bg-gray-800'}`}>
+                                <ChevronRight size={18} className={`transition-transform duration-200 ${expandedOrderId === order.order_id ? 'rotate-90 text-[#ff6b00]' : 'text-gray-500'}`} />
+                            </div>
                           </td>
                         </tr>
 
                         {expandedOrderId === order.order_id && (
-                            <tr className="bg-black/40 border-b border-gray-800">
+                            <tr className="bg-[#0f0f13] border-b border-gray-800 shadow-inner">
                                 <td colSpan={6} className="p-4 md:p-6">
                                     <div className="pl-3 md:pl-4 border-l-2 border-[#ff6b00]">
                                         <h4 className="text-[9px] md:text-[10px] font-bold uppercase text-gray-500 mb-3 md:mb-4 tracking-widest italic">Продукти в поръчката:</h4>
                                         {itemsLoading ? (
-                                            <div className="text-[#ff6b00] animate-pulse text-[10px] md:text-xs uppercase font-bold">Зареждане...</div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 animate-pulse">
+                                                <div className="h-16 bg-gray-800 rounded border border-gray-700"></div>
+                                                <div className="h-16 bg-gray-800 rounded border border-gray-700"></div>
+                                            </div>
                                         ) : (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
                                                 {orderItems.map((item, idx) => (
-                                                    <div key={idx} className="flex items-center gap-3 md:gap-4 bg-[#0a0a0a] p-2 md:p-3 rounded border border-gray-800">
-                                                        <img src={item.image_url} alt="" className="w-10 h-10 md:w-12 md:h-12 object-contain bg-white rounded p-1 shrink-0" />
+                                                    <div key={idx} className="flex items-center gap-3 md:gap-4 bg-[#18181b] p-2 md:p-3 rounded border border-gray-800/80 hover:border-gray-700 transition-colors">
+                                                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded p-1 shrink-0 flex items-center justify-center border border-gray-700">
+                                                            <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
+                                                        </div>
                                                         <div className="flex-grow min-w-0">
-                                                            <p className="font-bold text-[10px] md:text-xs uppercase text-white leading-tight truncate">{item.name}</p>
-                                                            <p className="text-[9px] md:text-[10px] text-gray-500 mt-0.5">КОЛ: {item.quantity}</p>
+                                                            <p className="font-bold text-[10px] md:text-xs uppercase text-gray-200 leading-tight truncate">{item.name}</p>
+                                                            <p className="text-[9px] md:text-[10px] text-gray-500 mt-0.5 font-mono">КОЛ: {item.quantity}</p>
                                                         </div>
                                                         <p className="font-bold text-[#ff6b00] text-xs md:text-sm whitespace-nowrap shrink-0">{Number(item.price_at_purchase).toFixed(2)} €</p>
                                                     </div>
@@ -549,8 +565,19 @@ export default function Dashboard() {
 
       {/* МОДАЛ ЗА СМЯНА НА ПАРОЛА */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md transition-opacity">
-            <div className="bg-[#0f0f13] border border-[#ff6b00]/20 w-full max-w-md rounded-2xl p-6 md:p-8 relative shadow-[0_0_50px_rgba(255,107,0,0.1)] overflow-hidden">
+        <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity"
+            onClick={(e) => {
+                // Затваря модала, ако кликнеш върху черния фон
+                if (e.target === e.currentTarget) {
+                    setIsPasswordModalOpen(false);
+                    setPassMessage({ type: "", text: "" }); 
+                    setShowOldPassword(false);
+                    setShowNewPassword(false);
+                }
+            }}
+        >
+            <div className="bg-[#0f0f13] border border-gray-800 w-full max-w-md rounded-2xl p-6 md:p-8 relative shadow-2xl overflow-hidden animate-fadeIn">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#ff6b00] to-transparent opacity-70"></div>
 
                 <button 
@@ -560,33 +587,33 @@ export default function Dashboard() {
                         setShowOldPassword(false);
                         setShowNewPassword(false);
                     }}
-                    className="absolute top-3 right-3 md:top-4 md:right-4 text-gray-500 hover:text-[#ff6b00] hover:bg-[#ff6b00]/10 p-2 rounded-full transition-all"
+                    className="absolute top-3 right-3 md:top-4 md:right-4 text-gray-500 hover:text-white bg-[#18181b] hover:bg-gray-800 p-2 rounded-full transition-all border border-gray-800 hover:border-gray-600"
                 >
-                    <X size={20} />
+                    <X size={16} />
                 </button>
 
                 <div className="text-center mb-6 md:mb-8 mt-2">
-                    <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 mb-3 md:mb-4 shadow-[0_0_20px_rgba(255,107,0,0.2)]">
-                        <Lock className="text-[#ff6b00] w-6 h-6 md:w-8 md:h-8" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#18181b] border border-gray-800 mb-3 md:mb-4 text-gray-400">
+                        <Lock size={24} />
                     </div>
                     <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider italic">
                         Сигурност
                     </h3>
-                    <p className="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 uppercase tracking-widest">Обновяване на паролата</p>
+                    <p className="text-[10px] md:text-xs text-[#ff6b00] mt-1 md:mt-2 uppercase tracking-widest font-bold">Обновяване на паролата</p>
                 </div>
 
                 <form onSubmit={handleChangePassword} className="space-y-4 md:space-y-5">
-                    <div className="space-y-1 md:space-y-2">
+                    <div className="space-y-1.5">
                         <label className="block text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Текуща парола</label>
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#ff6b00] transition-colors">
-                                <KeyRound size={16} className="md:w-[18px] md:h-[18px]" />
+                                <KeyRound size={16} />
                             </div>
                             <input 
                                 type={showOldPassword ? "text" : "password"}
                                 required
                                 placeholder="Въведете текущата парола..."
-                                className="w-full bg-[#18181b] border border-gray-800 p-3 md:p-4 pl-10 md:pl-12 pr-10 md:pr-12 rounded-xl text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none transition-all text-xs md:text-sm font-mono placeholder:font-sans placeholder:text-gray-600"
+                                className="w-full bg-[#18181b] border border-gray-800 p-3.5 pl-10 md:pl-12 pr-10 rounded-xl text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none transition-all text-xs md:text-sm font-mono placeholder:font-sans placeholder:text-gray-600"
                                 value={passData.oldPassword}
                                 onChange={(e) => setPassData({...passData, oldPassword: e.target.value})}
                             />
@@ -595,22 +622,22 @@ export default function Dashboard() {
                                 onClick={() => setShowOldPassword(!showOldPassword)}
                                 className="absolute inset-y-0 right-0 pr-3 md:pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
                             >
-                                {showOldPassword ? <EyeOff size={16} className="md:w-[18px] md:h-[18px]" /> : <Eye size={16} className="md:w-[18px] md:h-[18px]" />}
+                                {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
                     </div>
 
-                    <div className="space-y-1 md:space-y-2">
+                    <div className="space-y-1.5">
                         <label className="block text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Нова парола</label>
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#ff6b00] transition-colors">
-                                <ShieldCheck size={16} className="md:w-[18px] md:h-[18px]" />
+                                <ShieldCheck size={16} />
                             </div>
                             <input 
                                 type={showNewPassword ? "text" : "password"}
                                 required
                                 placeholder="Създайте нова парола..."
-                                className="w-full bg-[#18181b] border border-gray-800 p-3 md:p-4 pl-10 md:pl-12 pr-10 md:pr-12 rounded-xl text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none transition-all text-xs md:text-sm font-mono placeholder:font-sans placeholder:text-gray-600"
+                                className="w-full bg-[#18181b] border border-gray-800 p-3.5 pl-10 md:pl-12 pr-10 rounded-xl text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none transition-all text-xs md:text-sm font-mono placeholder:font-sans placeholder:text-gray-600"
                                 value={passData.newPassword}
                                 onChange={(e) => setPassData({...passData, newPassword: e.target.value})}
                             />
@@ -619,20 +646,20 @@ export default function Dashboard() {
                                 onClick={() => setShowNewPassword(!showNewPassword)}
                                 className="absolute inset-y-0 right-0 pr-3 md:pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
                             >
-                                {showNewPassword ? <EyeOff size={16} className="md:w-[18px] md:h-[18px]" /> : <Eye size={16} className="md:w-[18px] md:h-[18px]" />}
+                                {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
                     </div>
 
                     {passMessage.text && (
-                        <div className={`text-[10px] md:text-xs font-bold p-3 md:p-4 rounded-xl text-center uppercase tracking-widest border transition-all ${passMessage.type === 'error' ? 'bg-red-900/10 text-red-500 border-red-900/30' : 'bg-green-900/10 text-green-500 border-green-900/30'}`}>
+                        <div className={`text-[10px] md:text-xs font-bold p-3 md:p-4 rounded-lg text-center uppercase tracking-widest border transition-all ${passMessage.type === 'error' ? 'bg-red-900/10 text-red-500 border-red-900/30' : 'bg-green-900/10 text-green-500 border-green-900/30'}`}>
                             {passMessage.text}
                         </div>
                     )}
 
                     <button 
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#ff6b00] to-[#e65c00] hover:from-[#e65c00] hover:to-[#cc5200] text-black font-black uppercase py-3 md:py-4 rounded-xl shadow-[0_5px_15px_rgba(255,107,0,0.3)] hover:shadow-[0_8px_25px_rgba(255,107,0,0.5)] transition-all tracking-widest mt-2 md:mt-4 transform hover:-translate-y-1 text-xs md:text-sm"
+                        className="w-full bg-gradient-to-r from-[#ff6b00] to-[#e65c00] hover:from-[#e65c00] hover:to-[#cc5200] text-black font-black uppercase py-3.5 rounded-xl shadow-[0_5px_15px_rgba(255,107,0,0.2)] hover:shadow-[0_8px_25px_rgba(255,107,0,0.4)] transition-all tracking-widest mt-2 transform hover:-translate-y-1 text-xs"
                     >
                         Актуализирай
                     </button>
