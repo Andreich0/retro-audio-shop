@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext"; 
-import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -67,10 +67,9 @@ const ShopContent = () => {
 
   const [wishlist, setWishlist] = useState<number[]>([]);
 
-  // === НОВО: СТРАНИЦИРАНЕ И ИЗГЛЕД (КОЛОНИ) ===
-  const [gridCols, setGridCols] = useState<3 | 4 | 5>(3); // По подразбиране 3 на ред
+  const [gridCols, setGridCols] = useState<3 | 4 | 5>(3); 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15; // По колко продукта да се показват на страница
+  const itemsPerPage = 15; 
 
   const { addToCart } = useCart(); 
   const searchParams = useSearchParams();
@@ -155,11 +154,9 @@ const ShopContent = () => {
     }
 
     setFilteredProducts(result);
-    // При всяка промяна на филтрите връщаме на страница 1
     setCurrentPage(1); 
   }, [searchTerm, selectedCategories, selectedConditions, minPrice, maxPrice, sortOrder, products, priceLimit]);
 
-  // Смятане на продуктите за текущата страница
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
@@ -233,13 +230,11 @@ const ShopContent = () => {
   const minPercent = priceLimit > 0 ? (visualMin / priceLimit) * 100 : 0;
   const maxPercent = priceLimit > 0 ? (visualMax / priceLimit) * 100 : 100;
 
-  // Динамичен клас за колоните на големи екрани
   const gridClass = gridCols === 3 ? "xl:grid-cols-3 lg:grid-cols-3" : gridCols === 4 ? "xl:grid-cols-4 lg:grid-cols-3" : "xl:grid-cols-5 lg:grid-cols-4";
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#ff6b00] selection:text-black">
       
-      {/* HEADER SECTION */}
       <div className="relative bg-[#0f0f13] border-b border-[#ff6b00] py-8 md:py-12 px-4 overflow-hidden z-10">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-500 via-[#0a0a0a] to-[#0a0a0a]"></div>
         <div className="max-w-7xl mx-auto text-center relative z-10">
@@ -251,7 +246,6 @@ const ShopContent = () => {
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
         
-        {/* MOBILE FILTERS BUTTON */}
         <div className="lg:hidden mb-6 w-full">
             <button 
                 onClick={() => setIsMobileFilterOpen(true)}
@@ -263,7 +257,6 @@ const ShopContent = () => {
 
         <div className="flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
             
-            {/* SIDEBAR / FILTERS */}
             <aside className={`
                 fixed inset-0 z-[60] bg-[#0a0a0a] p-4 sm:p-6 pb-24 lg:pb-0 lg:static lg:bg-transparent lg:p-0 lg:w-1/4 lg:block lg:z-0
                 transition-transform duration-300 ease-in-out overflow-y-auto lg:overflow-visible lg:sticky lg:top-24
@@ -275,7 +268,6 @@ const ShopContent = () => {
                         <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-[#18181b] rounded-full border border-[#333]"><X size={20} /></button>
                     </div>
 
-                    {/* SEARCH */}
                     <div className="bg-[#18181b] p-4 md:p-5 rounded-xl border border-[#333]">
                         <h3 className="text-xs font-bold uppercase text-gray-500 mb-3 tracking-widest">Търсене</h3>
                         <div className="relative">
@@ -290,7 +282,6 @@ const ShopContent = () => {
                         </div>
                     </div>
 
-                    {/* CATEGORIES */}
                     <div className="bg-[#18181b] p-4 md:p-5 rounded-xl border border-[#333]">
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="text-xs font-bold uppercase text-gray-500 tracking-widest">Категории</h3>
@@ -314,7 +305,6 @@ const ShopContent = () => {
                         </div>
                     </div>
 
-                    {/* CONDITION */}
                     <div className="bg-[#18181b] p-4 md:p-5 rounded-xl border border-[#333]">
                         <div className="flex justify-between items-center mb-3">
                              <h3 className="text-xs font-bold uppercase text-gray-500 tracking-widest">Състояние</h3>
@@ -338,7 +328,6 @@ const ShopContent = () => {
                         </div>
                     </div>
 
-                    {/* PRICE RANGE */}
                     <div className="bg-[#18181b] p-4 md:p-5 rounded-xl border border-[#333]">
                         <h3 className="text-xs font-bold uppercase text-gray-500 mb-6 tracking-widest">Цена (€)</h3>
                         <div className="relative w-full h-1 bg-gray-700 rounded-lg mb-8 mt-2">
@@ -385,7 +374,6 @@ const ShopContent = () => {
                 </div>
             </aside>
 
-            {/* MAIN CONTENT AREA */}
             <main className="lg:w-3/4 w-full">
                 <div className="relative z-20 flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-[#333] gap-4">
                     <div>
@@ -408,7 +396,6 @@ const ShopContent = () => {
                         </span>
 
                         <div className="flex gap-2 w-full sm:w-auto">
-                            {/* === ИЗБОР НА ИЗГЛЕД (само за компютър/лаптоп) === */}
                             <div className="hidden lg:flex items-center bg-[#18181b] border border-[#333] rounded-xl p-1 shrink-0 h-10">
                                 <button 
                                     onClick={() => setGridCols(3)} 
@@ -472,8 +459,28 @@ const ShopContent = () => {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#ff6b00]"></div>
+                    // === СИВИТЕ СКЕЛЕТНИ КАРТИ (SKELETON LOADERS) ===
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 ${gridClass}`}>
+                        {Array.from({ length: gridCols === 3 ? 9 : 10 }).map((_, i) => (
+                            <div key={i} className="bg-[#18181b] border border-[#333] rounded-xl overflow-hidden flex flex-col h-full animate-pulse">
+                                <div className="h-48 sm:h-52 bg-[#222]"></div>
+                                <div className="p-4 md:p-5 flex flex-col flex-grow">
+                                    <div className="flex gap-2 mb-2 md:mb-3">
+                                        <div className="h-3 w-12 bg-[#333] rounded"></div>
+                                        <div className="h-3 w-16 bg-[#333] rounded"></div>
+                                    </div>
+                                    <div className="h-5 w-3/4 bg-[#333] rounded mb-2"></div>
+                                    <div className="h-5 w-1/2 bg-[#333] rounded mb-4"></div>
+                                    <div className="mt-auto pt-3 border-t border-[#333]/50">
+                                        <div className="h-8 w-1/3 bg-[#333] rounded mb-3 md:mb-4"></div>
+                                        <div className="flex gap-2">
+                                            <div className="h-8 md:h-10 w-full bg-[#333] rounded"></div>
+                                            <div className="h-8 md:h-10 w-full bg-[#333] rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : filteredProducts.length === 0 ? (
                     <div className="text-center py-20 bg-[#18181b] rounded-xl border border-[#333] shadow-inner px-4">
@@ -597,7 +604,6 @@ const ShopContent = () => {
                             ))}
                         </div>
 
-                        {/* === ПАГИНАЦИЯ (PAGINATION) === */}
                         {totalPages > 1 && (
                             <div className="flex justify-center items-center gap-2 mt-12 mb-4">
                                 <button

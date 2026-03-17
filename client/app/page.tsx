@@ -29,12 +29,19 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { addToCart } = useCart();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${API_URL}/products`)
       .then((res) => res.json())
-      .then((data) => setFeaturedProducts(data.slice(0, 4)))
-      .catch((err) => console.error(err));
+      .then((data) => {
+          setFeaturedProducts(data.slice(0, 4));
+          setLoading(false);
+      })
+      .catch((err) => {
+          console.error(err);
+          setLoading(false);
+      });
 
     const token = localStorage.getItem("token");
     if (token) {
@@ -153,7 +160,29 @@ export default function Home() {
             </h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.length > 0 ? (
+              {loading ? (
+                // === СИВИТЕ СКЕЛЕТНИ КАРТИ (SKELETON LOADERS) ===
+                Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-[#18181b] border border-[#333] rounded-xl overflow-hidden flex flex-col h-full animate-pulse">
+                        <div className="h-48 md:h-60 bg-[#222]"></div>
+                        <div className="p-4 md:p-5 flex flex-col flex-grow">
+                            <div className="flex gap-2 mb-2 md:mb-3">
+                                <div className="h-3 w-12 bg-[#333] rounded"></div>
+                                <div className="h-3 w-16 bg-[#333] rounded"></div>
+                            </div>
+                            <div className="h-5 w-3/4 bg-[#333] rounded mb-2"></div>
+                            <div className="h-5 w-1/2 bg-[#333] rounded mb-4"></div>
+                            <div className="mt-auto pt-3 md:pt-4 border-t border-[#333]/50">
+                                <div className="h-8 w-1/3 bg-[#333] rounded mb-3 md:mb-4"></div>
+                                <div className="flex gap-2">
+                                    <div className="h-8 md:h-10 w-full bg-[#333] rounded"></div>
+                                    <div className="h-8 md:h-10 w-full bg-[#333] rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))
+              ) : featuredProducts.length > 0 ? (
                 featuredProducts.map((product) => (
                   <div 
                       key={product.product_id} 
@@ -254,8 +283,7 @@ export default function Home() {
                 ))
               ) : (
                 <div className="col-span-full text-center text-gray-500 py-10">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ff6b00] mb-2"></div>
-                    <p>Зареждане на находки...</p>
+                    <p className="font-bold uppercase tracking-widest text-sm">Няма намерени продукти</p>
                 </div>
               )}
             </div>
