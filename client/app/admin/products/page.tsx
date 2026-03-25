@@ -42,7 +42,7 @@ export default function AdminPage() {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push("/login");
+        router.push("/auth");
         return;
       }
       try {
@@ -57,7 +57,7 @@ export default function AdminPage() {
             fetchProducts();
           }
         } else {
-          router.push("/login");
+          router.push("/auth");
         }
       } catch (err) {
         router.push("/dashboard");

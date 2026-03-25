@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("role");
     setIsLoggedIn(false);
     setRole("");
-    router.push("/login");
+    router.push("/auth");
   };
 
   return (

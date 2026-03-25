@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) { router.push("/login"); return; }
+      if (!token) { router.push("/auth"); return; }
 
       const res = await fetch(`${API_URL}/admin/users`, { headers: { "token": token } });
       const resMe = await fetch(`${API_URL}/auth/verify`, { headers: { "token": token } });

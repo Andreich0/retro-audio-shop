@@ -95,7 +95,7 @@ export default function Dashboard() {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role"); 
-    router.push("/login");
+    router.push("/auth");
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -232,7 +232,7 @@ export default function Dashboard() {
   useEffect(() => {
     const getData = async () => {
       const token = localStorage.getItem("token");
-      if (!token) return router.push("/login");
+      if (!token) return router.push("/auth");
 
       try {
         const userRes = await fetch(`${API_URL}/auth/verify`, { headers: { token } });

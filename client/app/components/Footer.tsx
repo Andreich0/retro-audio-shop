@@ -44,7 +44,7 @@ export default function Footer() {
               <li><Link href="/shop" className="hover:text-[#ff6b00] transition block py-1">Каталог</Link></li>
               <li><Link href="/contact" className="hover:text-[#ff6b00] transition block py-1">Контакти</Link></li>
               <li><Link href="/cart" className="hover:text-[#ff6b00] transition block py-1">Количка</Link></li>
-              <li><Link href="/login" className="hover:text-[#ff6b00] transition block py-1">Вход / Регистрация</Link></li>
+              <li><Link href="/auth" className="hover:text-[#ff6b00] transition block py-1">Вход / Регистрация</Link></li>
             </ul>
           </div>
 

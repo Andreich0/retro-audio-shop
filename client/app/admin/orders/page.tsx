@@ -43,7 +43,7 @@ export default function AdminOrders() {
     const fetchOrders = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) return router.push("/login");
+        if (!token) return router.push("/auth");
 
         const res = await fetch(`${API_URL}/admin/orders`, {
           headers: { token: token }

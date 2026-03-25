@@ -35,7 +35,7 @@ export default function ForgotPassword() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#ff6b00]/10 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="w-full max-w-md bg-[#18181b] border border-[#333] p-8 rounded-2xl shadow-2xl relative z-10">
-            <Link href="/login" className="text-gray-500 hover:text-[#ff6b00] transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-8">
+            <Link href="/auth" className="text-gray-500 hover:text-[#ff6b00] transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-8">
                 <ArrowLeft size={16} /> Назад към Вход
             </Link>
 
