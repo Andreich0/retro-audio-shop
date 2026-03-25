@@ -70,12 +70,11 @@ const ShopContent = () => {
 
   const [gridCols, setGridCols] = useState<3 | 4 | 5>(3); 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 16; // По-добре 16, за да се дели идеално на 2 и на 4
+  const itemsPerPage = 16; 
 
   const { addToCart } = useCart(); 
   const searchParams = useSearchParams();
 
-  // === НОВО: ЗАКЛЮЧВАНЕ НА СКРОЛА ПРИ ОТВОРЕНИ ФИЛТРИ ===
   useEffect(() => {
     if (isMobileFilterOpen) {
       document.body.style.overflow = 'hidden';
@@ -270,8 +269,8 @@ const ShopContent = () => {
             
             <aside className={`
                 fixed inset-0 z-[60] bg-[#0a0a0a] p-4 sm:p-6 pb-24 lg:pb-0 lg:static lg:bg-transparent lg:p-0 lg:w-1/4 lg:block lg:z-0
-                transition-transform duration-300 ease-in-out overflow-y-auto lg:overflow-visible lg:sticky lg:top-24
-                ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                transition-transform duration-300 ease-in-out lg:sticky lg:top-24 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto custom-scrollbar lg:pr-2
+                ${isMobileFilterOpen ? 'translate-x-0 overflow-y-auto' : '-translate-x-full lg:translate-x-0'}
             `}>
                 <div className="space-y-4 md:space-y-6">
                     <div className="flex justify-between items-center lg:hidden mb-4 border-b border-[#333] pb-4 sticky top-0 bg-[#0a0a0a] z-10 pt-2">
@@ -285,6 +284,7 @@ const ShopContent = () => {
                             <input
                                 type="text"
                                 placeholder="Модел..."
+                                maxLength={50} // Ограничение за търсачката
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-[#0a0a0a] border border-[#333] text-white p-3 pl-10 rounded-lg focus:border-[#ff6b00] outline-none transition uppercase text-sm font-bold placeholder:text-gray-600"
@@ -386,7 +386,6 @@ const ShopContent = () => {
             </aside>
 
             <main className="lg:w-3/4 w-full">
-                {/* ОПРАВЕН Z-INDEX ТУК (Вдигнат на z-40) */}
                 <div className="relative z-40 flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-[#333] gap-4">
                     <div>
                         <h2 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">
@@ -471,7 +470,6 @@ const ShopContent = () => {
                 </div>
 
                 {loading ? (
-                    // === СИВИТЕ СКЕЛЕТНИ КАРТИ (ОБНОВЕНИ ЗА 2 КОЛОНИ) ===
                     <div className={`grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-6 ${gridClass}`}>
                         {Array.from({ length: gridCols === 3 ? 9 : 10 }).map((_, i) => (
                             <div key={i} className="bg-[#111] border border-[#333] rounded-2xl overflow-hidden flex flex-col h-full animate-pulse">
@@ -514,7 +512,6 @@ const ShopContent = () => {
                     </div>
                 ) : (
                     <>
-                        {/* ОПРАВЕН ИЗГЛЕД: 2 ПРОДУКТА НА РЕД ЗА МОБИЛНИ */}
                         <div className={`grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-6 ${gridClass}`}>
                             {currentItems.map((product) => (
                            <div 
