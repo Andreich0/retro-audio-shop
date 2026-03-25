@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext"; 
-import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart, ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon } from "lucide-react";
 import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
@@ -68,7 +68,8 @@ const ShopContent = () => {
 
   const [wishlist, setWishlist] = useState<number[]>([]);
 
-  const [gridCols, setGridCols] = useState<3 | 4 | 5>(3); 
+  // ТУК Е ФИКСЪТ ЗА МОЗАЙКА И СПИСЪК (4 или 1 на ред)
+  const [gridCols, setGridCols] = useState<1 | 4>(4); 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 16; 
 
@@ -240,7 +241,7 @@ const ShopContent = () => {
   const minPercent = priceLimit > 0 ? (visualMin / priceLimit) * 100 : 0;
   const maxPercent = priceLimit > 0 ? (visualMax / priceLimit) * 100 : 100;
 
-  const gridClass = gridCols === 3 ? "xl:grid-cols-3 lg:grid-cols-3" : gridCols === 4 ? "xl:grid-cols-4 lg:grid-cols-3" : "xl:grid-cols-5 lg:grid-cols-4";
+  const gridClass = gridCols === 4 ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1";
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#ff6b00] selection:text-black">
@@ -284,7 +285,7 @@ const ShopContent = () => {
                             <input
                                 type="text"
                                 placeholder="Модел..."
-                                maxLength={50} // Ограничение за търсачката
+                                maxLength={50}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-[#0a0a0a] border border-[#333] text-white p-3 pl-10 rounded-lg focus:border-[#ff6b00] outline-none transition uppercase text-sm font-bold placeholder:text-gray-600"
@@ -407,27 +408,21 @@ const ShopContent = () => {
                         </span>
 
                         <div className="flex gap-2 w-full sm:w-auto">
+                            {/* НОВИ БУТОНИ ЗА МОЗАЙКА И СПИСЪК */}
                             <div className="hidden lg:flex items-center bg-[#18181b] border border-[#333] rounded-xl p-1 shrink-0 h-10">
                                 <button 
-                                    onClick={() => setGridCols(3)} 
-                                    title="3 на ред"
-                                    className={`w-8 h-full rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${gridCols === 3 ? 'bg-[#ff6b00] text-black shadow-md' : 'text-gray-500 hover:text-white'}`}
-                                >
-                                    3
-                                </button>
-                                <button 
                                     onClick={() => setGridCols(4)} 
-                                    title="4 на ред"
-                                    className={`w-8 h-full rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${gridCols === 4 ? 'bg-[#ff6b00] text-black shadow-md' : 'text-gray-500 hover:text-white'}`}
+                                    title="Мозайка"
+                                    className={`px-3 h-full rounded-lg flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-widest transition-colors ${gridCols === 4 ? 'bg-[#ff6b00] text-black shadow-md' : 'text-gray-500 hover:text-white'}`}
                                 >
-                                    4
+                                    <LayoutGrid size={14} /> <span className="hidden xl:inline">Мозайка</span>
                                 </button>
                                 <button 
-                                    onClick={() => setGridCols(5)} 
-                                    title="5 на ред"
-                                    className={`w-8 h-full rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${gridCols === 5 ? 'bg-[#ff6b00] text-black shadow-md' : 'text-gray-500 hover:text-white'}`}
+                                    onClick={() => setGridCols(1)} 
+                                    title="Списък"
+                                    className={`px-3 h-full rounded-lg flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-widest transition-colors ${gridCols === 1 ? 'bg-[#ff6b00] text-black shadow-md' : 'text-gray-500 hover:text-white'}`}
                                 >
-                                    5
+                                    <ListIcon size={14} /> <span className="hidden xl:inline">Списък</span>
                                 </button>
                             </div>
 
@@ -470,11 +465,11 @@ const ShopContent = () => {
                 </div>
 
                 {loading ? (
-                    <div className={`grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-6 ${gridClass}`}>
-                        {Array.from({ length: gridCols === 3 ? 9 : 10 }).map((_, i) => (
-                            <div key={i} className="bg-[#111] border border-[#333] rounded-2xl overflow-hidden flex flex-col h-full animate-pulse">
-                                <div className="h-36 sm:h-52 bg-[#222]"></div>
-                                <div className="p-3 md:p-5 flex flex-col flex-grow">
+                    <div className={`grid gap-2 sm:gap-6 ${gridClass}`}>
+                        {Array.from({ length: gridCols === 4 ? 8 : 4 }).map((_, i) => (
+                            <div key={i} className={`bg-[#111] border border-[#333] rounded-2xl overflow-hidden flex animate-pulse ${gridCols === 1 ? 'flex-col sm:flex-row' : 'flex-col h-full'}`}>
+                                <div className={`bg-[#222] ${gridCols === 1 ? 'h-48 sm:h-auto sm:w-1/3 md:w-1/4' : 'h-36 sm:h-52'}`}></div>
+                                <div className={`flex flex-col flex-grow ${gridCols === 1 ? 'p-4 md:p-6 sm:w-2/3 md:w-3/4 justify-center' : 'p-3 md:p-5'}`}>
                                     <div className="flex gap-2 mb-2 md:mb-3">
                                         <div className="h-3 w-12 bg-[#333] rounded"></div>
                                     </div>
@@ -512,13 +507,13 @@ const ShopContent = () => {
                     </div>
                 ) : (
                     <>
-                        <div className={`grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-6 ${gridClass}`}>
+                        <div className={`grid gap-2 sm:gap-6 ${gridClass}`}>
                             {currentItems.map((product) => (
                            <div 
                                 key={product.product_id} 
-                                className={`group bg-[#111] border border-[#333] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full ${product.stock === 0 ? 'border-gray-800 opacity-80' : 'hover:border-[#ff6b00] hover:shadow-[0_0_20px_rgba(255,107,0,0.1)]'}`}
+                                className={`group bg-[#111] border border-[#333] rounded-2xl overflow-hidden transition-all duration-300 flex ${gridCols === 1 ? 'flex-col sm:flex-row items-stretch' : 'flex-col h-full'} ${product.stock === 0 ? 'border-gray-800 opacity-80' : 'hover:border-[#ff6b00] hover:shadow-[0_0_20px_rgba(255,107,0,0.1)]'}`}
                             >
-                                <Link href={`/shop/${product.product_id}`} className="block relative h-36 sm:h-52 bg-[#0a0a0a] p-3 sm:p-4 overflow-hidden group/img border-b border-[#222]">
+                                <Link href={`/shop/${product.product_id}`} className={`block relative bg-[#0a0a0a] overflow-hidden group/img border-[#222] ${gridCols === 1 ? 'w-full sm:w-1/3 md:w-1/4 h-48 sm:h-full border-b sm:border-b-0 sm:border-r p-4 flex items-center justify-center' : 'h-36 sm:h-52 border-b p-3 sm:p-4'}`}>
                                     <img
                                         src={product.image_url || "/placeholder.jpg"}
                                         alt={product.name}
@@ -552,7 +547,7 @@ const ShopContent = () => {
                                     </button>
                                 </Link>
 
-                                <div className={`p-3 md:p-5 flex flex-col flex-grow bg-[#18181b] ${product.stock === 0 ? 'grayscale' : ''}`}>
+                                <div className={`flex flex-col flex-grow bg-[#18181b] ${product.stock === 0 ? 'grayscale' : ''} ${gridCols === 1 ? 'w-full sm:w-2/3 md:w-3/4 p-4 md:p-6' : 'p-3 md:p-5'}`}>
                                     <div className="flex gap-1.5 mb-2 md:mb-3 flex-wrap">
                                         <span className="text-[#ff6b00] text-[8px] sm:text-[9px] font-black uppercase tracking-widest bg-[#ff6b00]/10 border border-[#ff6b00]/20 px-1.5 py-0.5 rounded-md">
                                             {product.category}
