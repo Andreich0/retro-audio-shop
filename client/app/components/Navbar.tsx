@@ -35,27 +35,22 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Помощна променлива: Дали потребителят има админ права (Admin или Superadmin)
   const hasAdminAccess = isLoggedIn && (role === 'admin' || role === 'superadmin');
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <nav className="sticky top-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/10 border-t-4 border-t-[#ff6b00] shadow-[0_15px_40px_rgba(0,0,0,0.6)]">
-      {/* Намален padding за мобилни устройства */}
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-12">
-        {/* Намалена височина за мобилни устройства */}
         <div className="flex items-center justify-between h-20 md:h-24">
           
           {/* --- ЛОГО --- */}
           <div className="flex-shrink-0 group cursor-pointer z-50">
             <Link href="/" className="flex items-center gap-2 md:gap-4">
               <div className="text-[#ff6b00] transform group-hover:rotate-12 transition duration-500">
-                {/* По-малка икона на мобилни */}
                 <CassetteTape className="w-8 h-8 md:w-[42px] md:h-[42px]" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col leading-none">
-                {/* По-малък текст на мобилни */}
                 <span className="text-2xl md:text-3xl lg:text-4xl font-black italic tracking-tighter text-white group-hover:tracking-widest transition-all duration-300">
                   RETRO
                 </span>
@@ -79,7 +74,6 @@ export default function Navbar() {
                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#ff6b00] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </Link>
 
-            {/* НОВИЯТ ЛИНК ЗА КОНТАКТИ */}
             <Link href="/contact" className="relative px-5 py-3 text-gray-400 hover:text-white transition font-mono text-base uppercase tracking-widest group font-bold">
                 <span className="relative z-10">Контакти</span>
                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#ff6b00] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
@@ -92,7 +86,7 @@ export default function Navbar() {
                 </Link>
             )}
 
-            {/* --- АДМИН БУТОН (За Admin И Superadmin) --- */}
+            {/* --- АДМИН БУТОН --- */}
             {hasAdminAccess && (
               <div className="relative ml-6" ref={adminRef}>
                 <button 
@@ -143,7 +137,6 @@ export default function Navbar() {
           </div>
 
           {/* --- ДЯСНА ЧАСТ --- */}
-          {/* Регулируем gap за различни екрани */}
           <div className="flex items-center gap-3 sm:gap-6 md:gap-8 z-50">
 
             {/* БУТОН ЛЮБИМИ (WISHLIST) */}
@@ -163,14 +156,14 @@ export default function Navbar() {
                  <ShoppingCart className="w-5 h-5 md:w-7 md:h-7 text-gray-300 group-hover:text-[#ff6b00] transition" />
                </div>
                {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 md:-right-2 w-4 h-4 md:w-5 md:h-5 bg-[#ff6b00] text-black text-[10px] md:text-xs font-black flex items-center justify-center rounded-sm shadow-glow">
+                <span className="absolute -top-1 -right-1 md:-right-2 w-4 h-4 md:w-5 md:h-5 bg-[#ff6b00] text-black text-[10px] md:text-xs font-black flex items-center justify-center rounded-sm shadow-[0_0_10px_rgba(255,107,0,0.5)]">
                   {totalItems}
                 </span>
                )}
             </Link>
 
             {/* Логин / Изход */}
-            <div className="hidden md:block pl-8 border-l border-white/10">
+            <div className="hidden md:flex pl-8 border-l border-white/10 items-center">
                 {isLoggedIn ? (
                     <button 
                         onClick={logout}
@@ -179,9 +172,10 @@ export default function Navbar() {
                         [ ИЗХОД ]
                     </button>
                 ) : (
+                    // ТУК Е ФИКСЪТ: Води към /auth вместо /login
                     <Link 
-                        href="/login" 
-                        className="relative inline-block px-8 py-3 bg-[#ff6b00] hover:bg-[#e55a00] text-black font-black uppercase text-sm tracking-widest skew-x-[-12deg] transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,0,0.6)]"
+                        href="/auth" 
+                        className="relative inline-block px-8 py-3 bg-gradient-to-r from-[#ff6b00] to-[#e65c00] hover:from-[#e65c00] hover:to-[#cc5200] text-black font-black uppercase text-sm tracking-widest skew-x-[-12deg] transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,0,0.6)]"
                     >
                         <span className="inline-block skew-x-[12deg]">ВХОД</span>
                     </Link>
@@ -204,15 +198,12 @@ export default function Navbar() {
           <div className="px-6 py-6 space-y-2 font-mono">
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#ff6b00]/10 border-l-4 border-transparent hover:border-[#ff6b00] transition font-bold">НАЧАЛО</Link>
             <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#ff6b00]/10 border-l-4 border-transparent hover:border-[#ff6b00] transition font-bold">КАТАЛОГ</Link>
-            
-            {/* НОВИЯТ МОБИЛЕН ЛИНК ЗА КОНТАКТИ */}
             <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#ff6b00]/10 border-l-4 border-transparent hover:border-[#ff6b00] transition font-bold">КОНТАКТИ</Link>
             
             {isLoggedIn && (
                 <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-cyan-400 hover:bg-cyan-900/10 border-l-4 border-transparent hover:border-cyan-400 transition font-bold">МОЯТ ПРОФИЛ</Link>
             )}
 
-            {/* Проверка и тук за hasAdminAccess */}
             {hasAdminAccess && (
                 <div className="mt-4 pt-4 border-t border-gray-800">
                     <p className="px-4 text-xs text-red-500 uppercase mb-2 font-bold">
@@ -228,7 +219,8 @@ export default function Navbar() {
                 {isLoggedIn ? (
                     <button onClick={logout} className="w-full text-left px-4 text-red-500 font-black text-lg">ИЗХОД</button>
                 ) : (
-                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center py-4 bg-[#ff6b00] text-black font-black text-base uppercase skew-x-[-12deg] mx-2">
+                    // ТУК Е ФИКСЪТ: Води към /auth вместо /login
+                    <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center py-4 bg-gradient-to-r from-[#ff6b00] to-[#e65c00] text-black font-black text-base uppercase skew-x-[-12deg] mx-2">
                         <span className="skew-x-[12deg]">ВХОД В СИСТЕМАТА</span>
                     </Link>
                 )}
