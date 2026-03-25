@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // ДОБАВЕНО ЗА ПРЕНАСОЧВАНЕТО
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { 
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function Navbar() {
+  const router = useRouter(); // ИНИЦИАЛИЗИРАМЕ РУТЕРА
   const { isLoggedIn, role, logout } = useAuth();
   const { cart } = useCart();
   
@@ -35,6 +37,13 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // НОВА ФУНКЦИЯ ЗА ИЗХОД + ПРЕНАСОЧВАНЕ КЪМ /auth
+  const handleLogout = () => {
+    logout();
+    setIsMobileMenuOpen(false);
+    router.push("/auth");
+  };
 
   const hasAdminAccess = isLoggedIn && (role === 'admin' || role === 'superadmin');
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -130,23 +139,23 @@ export default function Navbar() {
                 <Heart className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_rgba(239,68,68,0.6)] transition-all" />
             </Link>
             
-            {/* КОЛИЧКА */}
+            {/* КОЛИЧКА (ОПРАВЕНА ПОЗИЦИЯ НА КРЪГЧЕТО) */}
             <Link href="/cart" className="relative group mr-2">
                <div className="p-2 border border-transparent group-hover:border-[#ff6b00]/30 rounded-full transition duration-300">
                  <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-gray-400 group-hover:text-[#ff6b00] transition" />
                </div>
                {totalItems > 0 && (
-                <span className="absolute 0 -right-1 w-4 h-4 md:w-5 md:h-5 bg-[#ff6b00] text-black text-[10px] md:text-xs font-black flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]">
+                <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-[#ff6b00] text-black text-[10px] md:text-xs font-black flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)] z-10">
                   {totalItems}
                 </span>
                )}
             </Link>
 
-            {/* --- НОВИ БУТОНИ ЗА ВХОД / ИЗХОД --- */}
+            {/* --- БУТОНИ ЗА ВХОД / ИЗХОД --- */}
             <div className="hidden md:flex pl-6 border-l border-[#333] items-center gap-4">
                 {isLoggedIn ? (
                     <button 
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="flex items-center gap-2 px-5 py-2.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300"
                     >
                         <LogOut size={16} /> Изход
@@ -196,7 +205,7 @@ export default function Navbar() {
 
             <div className="pt-6 mt-4 border-t border-[#333] pb-4">
                 {isLoggedIn ? (
-                    <button onClick={logout} className="w-full flex items-center justify-center gap-2 py-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-xl font-bold uppercase tracking-widest">
+                    <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-xl font-bold uppercase tracking-widest">
                       <LogOut size={18} /> ИЗХОД
                     </button>
                 ) : (
