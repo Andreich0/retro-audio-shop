@@ -35,7 +35,7 @@ function AuthContent() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${API_URL}/auth/auth`, {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginData),
@@ -68,11 +68,11 @@ function AuthContent() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${API_URL}/auth/auth`, {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registerData),
-      });
+        body: JSON.stringify(loginData),
+    });
       const data = await res.json();
 
       if (res.ok) {
