@@ -49,3 +49,13 @@ h1, h2, h3, h4, h5, h6 {
   color: #000;
   text-shadow: none;
 }
+
+/* === КУРСОР РЪЧИЧКА НА ВСИЧКИ ИНТЕРАКТИВНИ ЕЛЕМЕНТИ === */
+button, 
+a, 
+select, 
+input[type="checkbox"], 
+input[type="radio"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
