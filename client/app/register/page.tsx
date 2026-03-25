@@ -4,21 +4,17 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
-// ДЕФИНИРАМЕ API URL ТУК ЗА МАКСИМАЛНА СИГУРНОСТ
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
 export default function RegisterPage() {
   const router = useRouter();
   
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: ""
+    first_name: "", last_name: "", email: "", password: ""
   });
 
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,123 +24,148 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+        toast.error("Паролата трябва да е поне 8 символа (мин. 1 буква и 1 цифра).");
+        return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // ИЗПОЛЗВАМЕ API_URL КОНСТАНТАТА
-      const response = await fetch(`https://retro-audio-api-o7it.onrender.com/auth/register`, {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Успешна регистрация! Сега можете да влезете.");
-        router.push("/login");
+        toast.success("Успешна регистрация! Добре дошли!");
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        router.push("/dashboard");
       } else {
-        setError(data.message || "Възникна грешка при регистрацията.");
+        toast.error(data.message || "Грешка при регистрацията.");
       }
     } catch (err) {
-      console.error("Registration error:", err);
-      setError("Сървърът не отговаря. Моля, проверете връзката си или опитайте по-късно.");
+      toast.error("Сървърът не отговаря. Моля, опитайте по-късно.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f0f13] px-4 py-10">
-      <div className="bg-[#18181b] p-10 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full max-w-md border border-[#333]">
-        <h1 className="text-4xl font-black text-center mb-10 text-white tracking-widest uppercase italic">
-          Регистрация
-        </h1>
+    <div className="min-h-screen flex bg-[#050505] font-sans selection:bg-[#ff6b00] selection:text-black">
+      
+      {/* ДЯСНА ЧАСТ - СНИМКА (Само Десктоп, преместена вляво за този екран за симетрия) */}
+      <div className="hidden lg:block lg:w-[55%] relative overflow-hidden bg-[#0a0a0a]">
+        <div className="absolute top-1/3 right-20 w-48 h-48 border border-[#ff6b00]/20 rounded-full z-20 pointer-events-none"></div>
+        <div className="absolute bottom-1/4 left-10 w-24 h-24 border border-white/10 rounded-full z-20 animate-pulse pointer-events-none"></div>
         
-        {error && (
-            <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-6 text-sm text-center animate-pulse">
-                {error}
-            </div>
-        )}
+        <img 
+          src="https://images.unsplash.com/photo-1619983081563-430f53602796?q=80&w=1200&auto=format&fit=crop" 
+          alt="Tape Deck" 
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-30 mix-blend-luminosity hover:opacity-50 hover:scale-105 transition-all duration-[10s] ease-out"
+        />
+        
+        <div className="absolute inset-0 bg-gradient-to-l from-[#050505] via-transparent to-transparent z-10"></div>
+        
+        <div className="absolute top-20 left-20 z-30">
+            <p className="text-[#ff6b00] font-mono text-xs font-bold tracking-widest uppercase mb-2">Join the Club</p>
+            <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Analog.<br/> Pure & Simple.</h2>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {/* ФОРМАТА (Отдясно на Десктоп) */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-center px-6 sm:px-12 md:px-20 py-12 z-10 relative">
+        
+        <div className="w-full max-w-md mx-auto">
           
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="w-full">
-              <label className="block text-gray-400 mb-2 font-bold text-xs uppercase tracking-widest">Име</label>
-              <input
-                type="text"
-                name="first_name"
-                required
-                onChange={handleChange}
-                className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 focus:border-[#ff6b00] focus:outline-none transition-all duration-300 placeholder:text-gray-700"
-                placeholder="Иван"
-              />
-            </div>
-            <div className="w-full">
-              <label className="block text-gray-400 mb-2 font-bold text-xs uppercase tracking-widest">Фамилия</label>
-              <input
-                type="text"
-                name="last_name"
-                required
-                onChange={handleChange}
-                className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 focus:border-[#ff6b00] focus:outline-none transition-all duration-300 placeholder:text-gray-700"
-                placeholder="Петров"
-              />
+          <div className="mb-10">
+            <Link href="/" className="inline-block text-[#ff6b00] font-black text-xl tracking-tighter uppercase italic hover:opacity-80 transition mb-8 lg:hidden">
+              Retro <span className="text-white">Audio.</span>
+            </Link>
+            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-none mb-4">
+              Създай <br/> <span className="text-gray-500">Профил.</span>
+            </h1>
+            <p className="text-gray-500 text-sm font-bold uppercase tracking-widest">
+              Започни своето ретро аудио пътуване.
+            </p>
+          </div>
+
+          {/* ТАБОВЕ */}
+          <div className="flex mb-8 border-b border-[#222]">
+            <Link href="/login" className="pb-3 text-gray-600 hover:text-white font-bold text-xs uppercase tracking-widest pr-8 transition-colors">
+              Вход
+            </Link>
+            <div className="pb-3 border-b-2 border-[#ff6b00] text-white font-black text-xs uppercase tracking-widest pl-8 cursor-default">
+              Регистрация
             </div>
           </div>
 
-          <div>
-            <label className="block text-gray-400 mb-2 font-bold text-xs uppercase tracking-widest">Имейл</label>
-            <input
-              type="email"
-              name="email"
-              required
-              onChange={handleChange}
-              className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 focus:border-[#ff6b00] focus:outline-none transition-all duration-300 placeholder:text-gray-700"
-              placeholder="example@mail.com"
-            />
-          </div>
-
-          <div className="relative">
-            <label className="block text-gray-400 mb-2 font-bold text-xs uppercase tracking-widest">Парола</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              required
-              onChange={handleChange}
-              className="w-full bg-[#0f0f13] text-white border border-[#333] rounded p-4 pr-12 focus:border-[#ff6b00] focus:outline-none transition-all duration-300 placeholder:text-gray-700"
-              placeholder="••••••••"
-            />
+          <form onSubmit={handleSubmit} className="space-y-6">
             
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-[42px] text-gray-500 hover:text-[#ff6b00] transition"
-            >
-              {showPassword ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268-2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-              )}
-            </button>
-          </div>
-          
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full bg-[#ff6b00] hover:bg-[#e65c00] text-white font-black py-4 rounded transition-all shadow-lg uppercase tracking-widest transform hover:-translate-y-1 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isSubmitting ? "Обработка..." : "Регистрирай се"}
-          </button>
-        </form>
+            <div className="grid grid-cols-2 gap-4">
+                {/* ИМЕ */}
+                <div className="relative group pt-4">
+                    <input
+                        type="text" name="first_name" id="first_name" required value={formData.first_name} onChange={handleChange}
+                        className="block w-full px-0 py-3 text-white bg-transparent border-0 border-b-2 border-[#333] appearance-none focus:outline-none focus:ring-0 focus:border-[#ff6b00] peer transition-colors font-bold text-sm" placeholder=" "
+                    />
+                    <label htmlFor="first_name" className="absolute text-xs uppercase tracking-widest font-bold text-gray-500 duration-300 transform -translate-y-6 scale-75 top-7 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-[#ff6b00] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        Име
+                    </label>
+                </div>
 
-        <div className="mt-8 text-center border-t border-[#333] pt-6">
-          <p className="text-gray-500 text-sm">Вече имаш акаунт?</p>
-          <Link href="/login" className="text-white font-bold hover:text-[#ff6b00] mt-2 inline-block transition uppercase text-xs tracking-widest border-b border-transparent hover:border-[#ff6b00] pb-1">
-            Влез тук
-          </Link>
+                {/* ФАМИЛИЯ */}
+                <div className="relative group pt-4">
+                    <input
+                        type="text" name="last_name" id="last_name" required value={formData.last_name} onChange={handleChange}
+                        className="block w-full px-0 py-3 text-white bg-transparent border-0 border-b-2 border-[#333] appearance-none focus:outline-none focus:ring-0 focus:border-[#ff6b00] peer transition-colors font-bold text-sm" placeholder=" "
+                    />
+                    <label htmlFor="last_name" className="absolute text-xs uppercase tracking-widest font-bold text-gray-500 duration-300 transform -translate-y-6 scale-75 top-7 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-[#ff6b00] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        Фамилия
+                    </label>
+                </div>
+            </div>
+
+            {/* ИМЕЙЛ */}
+            <div className="relative group pt-4">
+              <input
+                type="email" name="email" id="reg-email" required value={formData.email} onChange={handleChange}
+                className="block w-full px-0 py-3 text-white bg-transparent border-0 border-b-2 border-[#333] appearance-none focus:outline-none focus:ring-0 focus:border-[#ff6b00] peer transition-colors font-mono text-sm" placeholder=" "
+              />
+              <label htmlFor="reg-email" className="absolute text-xs uppercase tracking-widest font-bold text-gray-500 duration-300 transform -translate-y-6 scale-75 top-7 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-[#ff6b00] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Имейл Адрес
+              </label>
+            </div>
+
+            {/* ПАРОЛА */}
+            <div className="relative group pt-4">
+              <input
+                type={showPassword ? "text" : "password"} name="password" id="reg-password" required value={formData.password} onChange={handleChange}
+                className="block w-full px-0 py-3 pr-10 text-white bg-transparent border-0 border-b-2 border-[#333] appearance-none focus:outline-none focus:ring-0 focus:border-[#ff6b00] peer transition-colors font-mono text-sm tracking-widest" placeholder=" "
+              />
+              <label htmlFor="reg-password" className="absolute text-xs uppercase tracking-widest font-bold text-gray-500 duration-300 transform -translate-y-6 scale-75 top-7 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-[#ff6b00] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Парола
+              </label>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-0 bottom-3 text-gray-500 hover:text-[#ff6b00] transition">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full mt-10 flex items-center justify-between bg-white hover:bg-[#ff6b00] text-black font-black py-4 px-6 rounded-none transition-all uppercase tracking-widest group ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span>{isSubmitting ? "Обработка..." : "Създай Профил"}</span>
+              {!isSubmitting && <ArrowRight size={20} className="transform group-hover:translate-x-2 transition-transform" />}
+            </button>
+          </form>
+
         </div>
       </div>
     </div>
