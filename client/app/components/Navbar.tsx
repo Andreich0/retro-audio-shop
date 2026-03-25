@@ -14,7 +14,8 @@ import {
   LogOut, 
   CassetteTape, 
   Users,
-  Heart
+  Heart,
+  User
 } from "lucide-react";
 
 export default function Navbar() {
@@ -36,7 +37,6 @@ export default function Navbar() {
   }, []);
 
   const hasAdminAccess = isLoggedIn && (role === 'admin' || role === 'superadmin');
-
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
@@ -91,43 +91,29 @@ export default function Navbar() {
               <div className="relative ml-6" ref={adminRef}>
                 <button 
                   onClick={() => setIsAdminOpen(!isAdminOpen)}
-                  className="group relative flex items-center gap-2 px-6 py-2 border-2 border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 uppercase font-bold text-sm tracking-widest skew-x-[-10deg]"
+                  className="group relative flex items-center gap-2 px-5 py-2 border border-red-500/50 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 uppercase font-bold text-xs tracking-widest"
                 >
-                  <span className="skew-x-[10deg] flex items-center gap-2">
+                  <span className="flex items-center gap-2">
                     {role === 'superadmin' ? 'SUPER ADMIN' : 'ADMIN'}
-                    <ChevronDown size={16} className={`transition-transform duration-300 ${isAdminOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${isAdminOpen ? 'rotate-180' : ''}`} />
                   </span>
                 </button>
 
                 {isAdminOpen && (
-                  <div className="absolute right-0 mt-4 w-64 origin-top-right bg-black border-2 border-red-900 shadow-[0_0_25px_rgba(220,38,38,0.3)] z-50 animate-fadeIn">
-                    <div className="absolute -top-1.5 right-6 w-3 h-3 bg-red-900 rotate-45"></div>
-                    
+                  <div className="absolute right-0 mt-4 w-64 origin-top-right bg-black border border-red-900 shadow-[0_0_25px_rgba(220,38,38,0.3)] z-50 animate-fadeIn rounded-xl overflow-hidden">
                     <div className="py-2">
                         <p className="px-5 text-xs text-red-600 font-mono uppercase border-b border-red-900/30 pb-2 mb-2 mx-2 font-bold">System Control</p>
                         
-                        <Link 
-                          href="/admin/products" 
-                          onClick={() => setIsAdminOpen(false)}
-                          className="flex items-center gap-4 px-5 py-4 text-base text-gray-300 hover:text-white hover:bg-red-900/20 transition font-mono uppercase font-bold"
-                        >
-                          <Package size={18} /> Продукти
+                        <Link href="/admin/products" onClick={() => setIsAdminOpen(false)} className="flex items-center gap-4 px-5 py-4 text-sm text-gray-300 hover:text-white hover:bg-red-900/20 transition font-mono uppercase font-bold">
+                          <Package size={16} /> Продукти
                         </Link>
                         
-                        <Link 
-                          href="/admin/orders" 
-                          onClick={() => setIsAdminOpen(false)}
-                          className="flex items-center gap-4 px-5 py-4 text-base text-gray-300 hover:text-white hover:bg-red-900/20 transition font-mono uppercase font-bold"
-                        >
-                          <List size={18} /> Поръчки
+                        <Link href="/admin/orders" onClick={() => setIsAdminOpen(false)} className="flex items-center gap-4 px-5 py-4 text-sm text-gray-300 hover:text-white hover:bg-red-900/20 transition font-mono uppercase font-bold">
+                          <List size={16} /> Поръчки
                         </Link>
 
-                        <Link 
-                          href="/admin/users" 
-                          onClick={() => setIsAdminOpen(false)}
-                          className="flex items-center gap-4 px-5 py-4 text-base text-gray-300 hover:text-white hover:bg-red-900/20 transition font-mono uppercase font-bold border-t border-red-900/20 mt-2 pt-4"
-                        >
-                          <Users size={18} /> Потребители
+                        <Link href="/admin/users" onClick={() => setIsAdminOpen(false)} className="flex items-center gap-4 px-5 py-4 text-sm text-gray-300 hover:text-white hover:bg-red-900/20 transition font-mono uppercase font-bold border-t border-red-900/20 mt-2 pt-4">
+                          <Users size={16} /> Потребители
                         </Link>
                     </div>
                   </div>
@@ -137,55 +123,48 @@ export default function Navbar() {
           </div>
 
           {/* --- ДЯСНА ЧАСТ --- */}
-          <div className="flex items-center gap-3 sm:gap-6 md:gap-8 z-50">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-6 z-50">
 
-            {/* БУТОН ЛЮБИМИ (WISHLIST) */}
-            <Link 
-                href="/wishlist" 
-                className="relative p-1 md:p-2 text-gray-300 hover:text-red-500 transition-all duration-300 group"
-                title="Любими продукти"
-            >
-                <Heart 
-                    className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_rgba(239,68,68,0.6)] transition-all" 
-                />
+            {/* БУТОН ЛЮБИМИ */}
+            <Link href="/wishlist" className="relative p-2 text-gray-400 hover:text-red-500 transition-all duration-300 group" title="Любими продукти">
+                <Heart className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_rgba(239,68,68,0.6)] transition-all" />
             </Link>
             
-            {/* Количка */}
-            <Link href="/cart" className="relative group">
-               <div className="p-1 md:p-3 border border-transparent group-hover:border-[#ff6b00]/30 rounded transition duration-300">
-                 <ShoppingCart className="w-5 h-5 md:w-7 md:h-7 text-gray-300 group-hover:text-[#ff6b00] transition" />
+            {/* КОЛИЧКА */}
+            <Link href="/cart" className="relative group mr-2">
+               <div className="p-2 border border-transparent group-hover:border-[#ff6b00]/30 rounded-full transition duration-300">
+                 <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-gray-400 group-hover:text-[#ff6b00] transition" />
                </div>
                {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 md:-right-2 w-4 h-4 md:w-5 md:h-5 bg-[#ff6b00] text-black text-[10px] md:text-xs font-black flex items-center justify-center rounded-sm shadow-[0_0_10px_rgba(255,107,0,0.5)]">
+                <span className="absolute 0 -right-1 w-4 h-4 md:w-5 md:h-5 bg-[#ff6b00] text-black text-[10px] md:text-xs font-black flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(255,107,0,0.5)]">
                   {totalItems}
                 </span>
                )}
             </Link>
 
-            {/* Логин / Изход */}
-            <div className="hidden md:flex pl-8 border-l border-white/10 items-center">
+            {/* --- НОВИ БУТОНИ ЗА ВХОД / ИЗХОД --- */}
+            <div className="hidden md:flex pl-6 border-l border-[#333] items-center gap-4">
                 {isLoggedIn ? (
                     <button 
                         onClick={logout}
-                        className="text-sm font-mono text-gray-500 hover:text-white uppercase tracking-widest flex items-center gap-2 transition font-bold"
+                        className="flex items-center gap-2 px-5 py-2.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300"
                     >
-                        [ ИЗХОД ]
+                        <LogOut size={16} /> Изход
                     </button>
                 ) : (
-                    // ТУК Е ФИКСЪТ: Води към /auth вместо /login
                     <Link 
                         href="/auth" 
-                        className="relative inline-block px-8 py-3 bg-gradient-to-r from-[#ff6b00] to-[#e65c00] hover:from-[#e65c00] hover:to-[#cc5200] text-black font-black uppercase text-sm tracking-widest skew-x-[-12deg] transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,0,0.6)]"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-[#ff6b00]/10 text-[#ff6b00] hover:bg-[#ff6b00] hover:text-black border border-[#ff6b00]/30 hover:border-[#ff6b00] rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-[0_0_15px_rgba(255,107,0,0.1)] hover:shadow-[0_0_20px_rgba(255,107,0,0.4)]"
                     >
-                        <span className="inline-block skew-x-[12deg]">ВХОД</span>
+                        <User size={16} /> Вход
                     </Link>
                 )}
             </div>
 
             {/* Мобилен бутон */}
-            <div className="xl:hidden flex items-center ml-1">
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-[#ff6b00] hover:text-white transition p-1">
-                {isMobileMenuOpen ? <X className="w-7 h-7 md:w-9 md:h-9" /> : <Menu className="w-7 h-7 md:w-9 md:h-9" />}
+            <div className="xl:hidden flex items-center">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-[#ff6b00] hover:text-white transition p-2 bg-[#18181b] rounded-lg border border-[#333]">
+                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
             </div>
           </div>
@@ -194,34 +173,35 @@ export default function Navbar() {
 
       {/* --- МОБИЛНО МЕНЮ --- */}
       {isMobileMenuOpen && (
-        <div className="xl:hidden absolute top-full left-0 w-full bg-[#0f0f13] border-b-4 border-[#ff6b00] shadow-[0_20px_40px_rgba(0,0,0,0.8)] max-h-[calc(100vh-80px)] overflow-y-auto">
+        <div className="xl:hidden absolute top-full left-0 w-full bg-[#0a0a0a] border-b-4 border-[#ff6b00] shadow-[0_20px_40px_rgba(0,0,0,0.9)] max-h-[calc(100vh-80px)] overflow-y-auto">
           <div className="px-6 py-6 space-y-2 font-mono">
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#ff6b00]/10 border-l-4 border-transparent hover:border-[#ff6b00] transition font-bold">НАЧАЛО</Link>
-            <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#ff6b00]/10 border-l-4 border-transparent hover:border-[#ff6b00] transition font-bold">КАТАЛОГ</Link>
-            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#ff6b00]/10 border-l-4 border-transparent hover:border-[#ff6b00] transition font-bold">КОНТАКТИ</Link>
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#18181b] rounded-lg transition font-bold">НАЧАЛО</Link>
+            <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#18181b] rounded-lg transition font-bold">КАТАЛОГ</Link>
+            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-white hover:bg-[#18181b] rounded-lg transition font-bold">КОНТАКТИ</Link>
             
             {isLoggedIn && (
-                <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-cyan-400 hover:bg-cyan-900/10 border-l-4 border-transparent hover:border-cyan-400 transition font-bold">МОЯТ ПРОФИЛ</Link>
+                <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-lg md:text-xl text-cyan-400 hover:bg-[#18181b] rounded-lg transition font-bold">МОЯТ ПРОФИЛ</Link>
             )}
 
             {hasAdminAccess && (
-                <div className="mt-4 pt-4 border-t border-gray-800">
-                    <p className="px-4 text-xs text-red-500 uppercase mb-2 font-bold">
-                        {role === 'superadmin' ? 'Super Admin Access' : 'Admin Access'}
+                <div className="mt-4 pt-4 border-t border-[#333]">
+                    <p className="px-4 text-xs text-red-500 uppercase mb-2 font-bold tracking-widest">
+                        {role === 'superadmin' ? 'Super Admin' : 'Admin'}
                     </p>
-                    <Link href="/admin/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-2 text-base text-gray-400 hover:text-red-400">Products</Link>
-                    <Link href="/admin/orders" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-2 text-base text-gray-400 hover:text-red-400">Orders</Link>
-                    <Link href="/admin/users" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-2 text-base text-gray-400 hover:text-red-400">Users</Link>
+                    <Link href="/admin/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-base text-gray-400 hover:bg-[#18181b] hover:text-white rounded-lg transition">Продукти</Link>
+                    <Link href="/admin/orders" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-base text-gray-400 hover:bg-[#18181b] hover:text-white rounded-lg transition">Поръчки</Link>
+                    <Link href="/admin/users" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 text-base text-gray-400 hover:bg-[#18181b] hover:text-white rounded-lg transition">Потребители</Link>
                 </div>
             )}
 
-            <div className="pt-6 mt-4 border-t border-gray-800 pb-4">
+            <div className="pt-6 mt-4 border-t border-[#333] pb-4">
                 {isLoggedIn ? (
-                    <button onClick={logout} className="w-full text-left px-4 text-red-500 font-black text-lg">ИЗХОД</button>
+                    <button onClick={logout} className="w-full flex items-center justify-center gap-2 py-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-xl font-bold uppercase tracking-widest">
+                      <LogOut size={18} /> ИЗХОД
+                    </button>
                 ) : (
-                    // ТУК Е ФИКСЪТ: Води към /auth вместо /login
-                    <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center py-4 bg-gradient-to-r from-[#ff6b00] to-[#e65c00] text-black font-black text-base uppercase skew-x-[-12deg] mx-2">
-                        <span className="skew-x-[12deg]">ВХОД В СИСТЕМАТА</span>
+                    <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-2 py-4 bg-[#ff6b00]/10 text-[#ff6b00] border border-[#ff6b00]/30 hover:bg-[#ff6b00] hover:text-black rounded-xl font-bold uppercase tracking-widest transition-all">
+                        <User size={18} /> ВХОД В СИСТЕМАТА
                     </Link>
                 )}
             </div>
