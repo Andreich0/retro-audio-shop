@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import toast from "react-hot-toast"; // ВАЖНО: Импортираме toast
 
 // Дефинираме как изглежда един продукт в количката
 interface CartItem {
@@ -9,7 +10,7 @@ interface CartItem {
   price: number;
   image_url: string;
   category: string;
-  stock: number; // ВАЖНО: Добавихме наличност
+  stock: number; 
   quantity: number;
 }
 
@@ -44,7 +45,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [cart, isLoaded]);
 
-  // --- ДОБАВЯНЕ В КОЛИЧКАТА (С ПРОВЕРКА ЗА НАЛИЧНОСТ) ---
+  // --- ДОБАВЯНЕ В КОЛИЧКАТА ---
   const addToCart = (product: any) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.product_id === product.product_id);
@@ -52,10 +53,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       if (existingItem) {
         // ПРОВЕРКА: Има ли достатъчно наличност за още 1 бройка?
         if (existingItem.quantity + 1 > product.stock) {
-            alert(`Съжаляваме, разполагаме само с ${product.stock} бр. от този продукт!`);
+            toast.error(`Съжаляваме, разполагаме само с ${product.stock} бр. от този продукт!`);
             return prevCart; // Не променяме нищо
         }
 
+        toast.success("Добавено още 1 към количката!");
         return prevCart.map((item) =>
           item.product_id === product.product_id
             ? { ...item, quantity: item.quantity + 1 }
@@ -64,9 +66,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         // Ако го няма, го добавяме с количество 1 (ако има поне 1 наличен)
         if (product.stock < 1) {
-            alert("Продуктът е изчерпан!");
+            toast.error("Продуктът е изчерпан!");
             return prevCart;
         }
+        
+        toast.success(`${product.name} е добавен в количката!`);
         return [...prevCart, { ...product, quantity: 1, stock: product.stock }];
       }
     });
@@ -77,7 +81,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setCart((prevCart) => prevCart.filter((item) => item.product_id !== id));
   };
 
-  // --- ОБНОВЯВАНЕ НА КОЛИЧЕСТВОТО (С ПРОВЕРКА) ---
+  // --- ОБНОВЯВАНЕ НА КОЛИЧЕСТВОТО ---
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity < 1) return; // Не позволяваме 0 или отрицателно
 
@@ -86,7 +90,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             if (item.product_id === id) {
                 // ПРОВЕРКА: Ако опитваме да увеличим над наличното
                 if (newQuantity > item.stock) {
-                     alert(`Максималното налично количество е ${item.stock} бр.`);
+                     toast.error(`Максималното налично количество е ${item.stock} бр.`);
                      return item; // Връщаме старото състояние
                 }
                 return { ...item, quantity: newQuantity };
