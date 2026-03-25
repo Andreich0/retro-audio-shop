@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext"; 
 import { Search, ShoppingCart, Eye, SlidersHorizontal, X, PackageX, Check, ArrowDownUp, ChevronDown, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -185,7 +186,7 @@ const ShopContent = () => {
       const token = localStorage.getItem("token");
       
       if (!token) {
-          alert("Моля, влезте в профила си, за да добавяте в любими!");
+          toast.error("Моля, влезте в профила си, за да добавяте в любими!");
           return;
       }
 

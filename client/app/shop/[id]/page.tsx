@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "../../../context/CartContext"; 
 import { ShoppingCart, ArrowLeft, ShieldCheck, Activity, Truck, Package, Check, XCircle, Heart, Eye, PackageX } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Product {
   product_id: number;
@@ -84,7 +85,7 @@ export default function ProductPage() {
       const token = localStorage.getItem("token");
       
       if (!token) {
-          alert("Моля, влезте в профила си, за да добавяте в любими!");
+          toast.error("Моля, влезте в профила си, за да добавяте в любими!");
           return;
       }
 

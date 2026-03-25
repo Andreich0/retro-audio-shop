@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { Truck, Landmark, CreditCard, ChevronRight, ShoppingBag, AlertCircle, User, MapPin, Check, ShieldCheck, Mail, Lock } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -32,7 +33,7 @@ export default function CheckoutPage() {
     if (canceled === "true" && orderId) {
       fetch(`${API_URL}/orders/${orderId}/cancel`, { method: "DELETE" })
         .then(() => {
-          alert("Плащането беше прекъснато. Поръчката не е завършена.");
+          toast.error("Плащането беше прекъснато. Поръчката не е завършена.");
           window.history.replaceState(null, '', '/checkout');
         })
         .catch(err => console.error(err));
@@ -327,23 +328,6 @@ export default function CheckoutPage() {
                             </div>
                             <Truck className={`w-6 h-6 md:w-7 md:h-7 transition-colors shrink-0 ${formData.paymentMethod === 'cod' ? 'text-[#ff6b00]' : 'text-gray-500'}`} strokeWidth={1.5} />
                         </div>
-                    </label>
-
-                    <label className={`group relative block border p-4 md:p-5 rounded-xl cursor-pointer transition-all ${formData.paymentMethod === 'bank' ? 'border-[#ff6b00] bg-[#ff6b00]/5' : 'border-[#333] hover:border-gray-500 bg-[#0a0a0a]'}`}>
-                        <div className="flex items-center gap-3 md:gap-4">
-                            <input type="radio" name="paymentMethod" value="bank" checked={formData.paymentMethod === 'bank'} onChange={handleChange} className="w-4 h-4 md:w-5 md:h-5 text-[#ff6b00] accent-[#ff6b00]" />
-                            <div className="flex-grow">
-                                <p className="font-bold uppercase text-xs md:text-sm tracking-wider">Банков превод</p>
-                                <p className="text-[10px] md:text-xs text-gray-400 mt-0.5">Изпращане след получен превод.</p>
-                            </div>
-                            <Landmark className={`w-6 h-6 md:w-7 md:h-7 transition-colors shrink-0 ${formData.paymentMethod === 'bank' ? 'text-[#ff6b00]' : 'text-gray-500'}`} strokeWidth={1.5} />
-                        </div>
-                        {formData.paymentMethod === 'bank' && (
-                            <div className="mt-3 pt-3 md:mt-4 md:pt-4 border-t border-[#333] text-xs md:text-sm text-gray-300 pl-7 md:pl-9 animate-fadeIn">
-                                <p className="mb-1.5 md:mb-2"><span className="text-gray-500 text-[10px] uppercase font-bold block tracking-widest">IBAN:</span> BG11 UNCR 7000 1523 4567 89</p>
-                                <p><span className="text-gray-500 text-[10px] uppercase font-bold block tracking-widest">Основание:</span> Номер на поръчката</p>
-                            </div>
-                        )}
                     </label>
 
                     <label className={`group relative block border p-4 md:p-5 rounded-xl cursor-pointer transition-all ${formData.paymentMethod === 'card' ? 'border-[#ff6b00] bg-[#ff6b00]/5' : 'border-[#333] hover:border-gray-500 bg-[#0a0a0a]'}`}>

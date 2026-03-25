@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Shield, ShieldOff, UserCheck, Search, ShieldAlert, Key, Crown } from "lucide-react"; 
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -58,13 +59,13 @@ export default function AdminUsersPage() {
         method: "DELETE", headers: { "token": token || "" }
       });
       if (res.ok) setUsers(users.filter(u => u.user_id !== id));
-      else { const msg = await res.json(); alert(msg); }
+      else { const msg = await res.json(); toast.error(msg); }
     } catch (err) { console.error(err); }
   };
 
   const toggleUserRole = async (user: UserData) => {
     if (myRole !== 'superadmin') {
-        alert("Само Super Admin може да променя роли!");
+        toast.error("Само Super Admin може да променя роли!");
         return;
     }
 
@@ -82,7 +83,7 @@ export default function AdminUsersPage() {
         fetchUsers(); 
       } else {
         const msg = await res.json();
-        alert(msg);
+        toast.error(msg);
       }
     } catch (err) { console.error(err); }
   };
@@ -100,10 +101,10 @@ export default function AdminUsersPage() {
         });
 
         if (res.ok) {
-            alert("Паролата е сменена успешно!");
+            toast.success("Паролата е сменена успешно!");
         } else {
             const msg = await res.json();
-            alert(msg);
+            toast.error(msg);
         }
     } catch (err) { console.error(err); }
   };

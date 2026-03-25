@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 // ДЕФИНИРАМЕ API URL ТУК ЗА МАКСИМАЛНА СИГУРНОСТ
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
@@ -41,7 +42,7 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Успешна регистрация! Сега можете да влезете.");
+        toast.success("Успешна регистрация! Сега можете да влезете.");
         router.push("/login");
       } else {
         setError(data.message || "Възникна грешка при регистрацията.");

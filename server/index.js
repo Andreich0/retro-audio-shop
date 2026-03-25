@@ -9,9 +9,20 @@ const multer = require("multer");
 const fs = require("fs");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const path = require("path");
+// ВАЖНО: Добавяме пакета за лимитиране
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
+
+// === RATE LIMITING (ОГРАНИЧЕНИЕ НА ЗАЯВКИТЕ) ===
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минути прозорец
+  max: 100, // Лимит 100 заявки на IP за този прозорец
+  message: { message: "Твърде много заявки от това IP. Моля, опитайте по-късно." },
+  standardHeaders: true, 
+  legacyHeaders: false, 
+});
 
 // === MIDDLEWARE ===
 app.use(cors({
@@ -26,6 +37,11 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
+
+// Прилагаме лимитера САМО върху критични пътища:
+app.use("/auth", apiLimiter);
+app.use("/orders", apiLimiter);
+app.use("/contact", apiLimiter);
 
 // ==========================================
 //              BREVO API (ИМЕЙЛИ)
@@ -152,10 +168,8 @@ const sendOrderConfirmationEmails = async (orderId) => {
       </div>
     `;
 
-    // --- ПРОМЯНАТА Е ТУК: ВЗИМАМЕ ИМЕЙЛА ДИРЕКТНО ОТ ПОРЪЧКАТА ---
     let customerEmail = order.customer_email;
     
-    // Ако е стара поръчка без имейл, търсим го в users таблицата
     if (!customerEmail && order.user_id) {
         const userRes = await pool.query("SELECT email FROM users WHERE user_id = $1", [order.user_id]);
         if (userRes.rows.length > 0) customerEmail = userRes.rows[0].email;
@@ -352,7 +366,6 @@ app.post("/orders", async (req, res) => {
     const token = req.header("token");
     let userId = null;
 
-    // 1. Проверяваме дали потребителят е логнат (има валиден token)
     if (token) {
       try {
         const payload = jwt.verify(token, process.env.JWT_SECRET || "secret_key");
@@ -360,16 +373,12 @@ app.post("/orders", async (req, res) => {
       } catch (err) { console.log("Guest order."); }
     }
 
-    // --- НОВАТА ЛОГИКА Е ТУК ---
-    // 2. Ако не е логнат (userId е null), но е въвел имейл, 
-    // проверяваме дали този имейл има регистрация в сайта.
     if (!userId && customer.email) {
         const userCheck = await pool.query("SELECT user_id FROM users WHERE email = $1", [customer.email]);
         if (userCheck.rows.length > 0) {
-            userId = userCheck.rows[0].user_id; // Намерихме го! Вързваме поръчката към профила му.
+            userId = userCheck.rows[0].user_id;
         }
     }
-    // ---------------------------
 
     await pool.query("BEGIN"); 
 

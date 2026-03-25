@@ -4,6 +4,7 @@ import { useEffect, useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { Package, MapPin, ChevronRight, CheckCircle, Truck, XCircle, Clock, Mail } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -49,7 +50,7 @@ export default function AdminOrders() {
         });
 
         if (res.status === 403) {
-            alert("Нямате администраторски права!");
+            toast.error("Нямате администраторски права!");
             router.push("/dashboard");
             return;
         }
@@ -83,7 +84,7 @@ export default function AdminOrders() {
         }
     } catch (err) {
         console.error(err);
-        alert("Грешка при обновяване.");
+        toast.error("Грешка при обновяване.");
     }
   };
 

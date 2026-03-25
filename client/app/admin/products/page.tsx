@@ -2,10 +2,10 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent, DragEvent } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
-// ТУК Е ФИКСЪТ: stock вече е number, а price може да е string или number
 interface Product {
   product_id: number;
   name: string;
@@ -21,6 +21,7 @@ export default function AdminPage() {
   const router = useRouter();
   
   const [products, setProducts] = useState<Product[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   const [inputs, setInputs] = useState({
     name: "",
@@ -37,19 +38,43 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}/auth/verify`, { headers: { token } });
+        if (res.ok) {
+          const userData = await res.json();
+          if (userData.role !== "admin" && userData.role !== "superadmin") {
+            toast.error("Нямате достъп до тази страница!");
+            router.push("/dashboard");
+          } else {
+            setIsAdmin(true);
+            fetchProducts();
+          }
+        } else {
+          router.push("/login");
+        }
+      } catch (err) {
+        router.push("/dashboard");
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API_URL}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
-      console.error("Грешка при зареждане на продукти:", err);
+      toast.error("Грешка при зареждане на продукти.");
     }
   };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
@@ -61,7 +86,7 @@ export default function AdminPage() {
 
   const uploadFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-        alert("Моля, качете файл изображение!");
+        toast.error("Моля, качете файл изображение!");
         return;
     }
 
@@ -76,8 +101,9 @@ export default function AdminPage() {
       });
       const data = await res.json();
       setInputs((prev) => ({ ...prev, image_url: data.url }));
+      toast.success("Снимката е качена успешно!");
     } catch (err) {
-      alert("Неуспешно качване на снимка.");
+      toast.error("Неуспешно качване на снимка.");
     } finally {
       setUploading(false);
       setIsDragging(false);
@@ -123,7 +149,7 @@ export default function AdminPage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Моля, влезте в профила си като администратор!");
+        toast.error("Моля, влезте в профила си като администратор!");
         return;
       }
 
@@ -148,14 +174,14 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        alert(editingId ? "Продуктът е обновен!" : "Продуктът е добавен!");
+        toast.success(editingId ? "Продуктът е обновен!" : "Продуктът е добавен!");
         resetForm();
         fetchProducts();
       } else {
-        alert("Грешка! Уверете се, че сте администратор.");
+        toast.error("Грешка! Уверете се, че сте администратор.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Сървърна грешка.");
     } finally {
       setLoading(false);
     }
@@ -172,12 +198,13 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
+        toast.success("Продуктът е изтрит успешно.");
         fetchProducts();
       } else {
-        alert("Грешка при изтриване.");
+        toast.error("Грешка при изтриване.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Сървърна грешка.");
     }
   };
 
@@ -207,6 +234,8 @@ export default function AdminPage() {
         condition: "good" 
     });
   };
+
+  if (!isAdmin) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-[#ff6b00] font-bold animate-pulse uppercase tracking-widest text-xs">Проверка на права...</div>;
 
   return (
     <div className="min-h-screen bg-[#0f0f13] text-white p-4 md:p-8 flex flex-col items-center font-sans">

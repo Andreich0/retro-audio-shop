@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle, CassetteTape } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -26,12 +27,12 @@ export default function ContactPage() {
         setTimeout(() => setStatus("idle"), 5000);
       } else {
         setStatus("idle");
-        alert("Възникна грешка при изпращането. Моля, опитайте по-късно.");
+        toast.error("Възникна грешка при изпращането. Моля, опитайте по-късно.");
       }
     } catch (error) {
       console.error(error);
       setStatus("idle");
-      alert("Сървърна грешка. Моля, опитайте по-късно.");
+      toast.error("Сървърна грешка. Моля, опитайте по-късно.");
     }
   };
 

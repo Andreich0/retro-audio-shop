@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { Eye, ShoppingCart, PackageX, Heart } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -57,7 +58,7 @@ export default function Home() {
     const token = localStorage.getItem("token");
     
     if (!token) {
-        alert("Моля, влезте в профила си, за да добавяте в любими!");
+        toast.error("Моля, влезте в профила си, за да добавяте в любими!");
         return;
     }
 

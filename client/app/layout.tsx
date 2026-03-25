@@ -6,6 +6,8 @@ import Footer from "./components/Footer";
 import CookieBanner from "./components/CookieBanner";
 import { AuthProvider } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
+// 1. ИМПОРТИРАМЕ TOASTER
+import { Toaster } from "react-hot-toast"; 
 
 const jura = Jura({ 
   subsets: ["latin", "cyrillic"], 
@@ -21,11 +23,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Retro Audio Shop | Върни се в златната ера на звука",
     description: "Разгледай нашата селекция от реставрирана винтидж аудио техника. Високо качество и гаранция.",
-    url: "https://retro-audio-shop.vercel.app", // Ако Vercel линкът ти е друг, смени го тук
+    url: "https://retro-audio-shop.vercel.app", 
     siteName: "Retro Audio Shop",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1200&auto=format&fit=crop", // Снимката при споделяне
+        url: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1200&auto=format&fit=crop", 
         width: 1200,
         height: 630,
         alt: "Retro Audio Shop - Винтидж техника",
@@ -59,6 +61,30 @@ export default function RootLayout({
         </AuthProvider>
         
         <CookieBanner />
+
+        {/* 2. ДОБАВЯМЕ КОМПОНЕНТА ЗА ИЗСКАЧАЩИ СЪОБЩЕНИЯ */}
+        <Toaster 
+          position="bottom-right"
+          reverseOrder={false}
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#18181b', // Тъмен фон като картите ни
+              color: '#fff',
+              border: '1px solid #333',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            },
+            success: {
+              iconTheme: { primary: '#ff6b00', secondary: '#000' },
+            },
+            error: {
+              iconTheme: { primary: '#ef4444', secondary: '#fff' },
+            },
+          }}
+        />
       </body>
     </html>
   );

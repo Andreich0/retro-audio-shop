@@ -8,6 +8,7 @@ import {
   ChevronRight, AlertTriangle, Lock, X, Eye, EyeOff, 
   KeyRound, ShieldCheck, Edit2, Save, Phone
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://retro-audio-api-o7it.onrender.com";
 
@@ -193,9 +194,9 @@ export default function Dashboard() {
       if (res.ok) {
         setOrders(prevOrders => prevOrders.filter(o => o.order_id !== orderId));
         if (expandedOrderId === orderId) setExpandedOrderId(null);
-        alert("Поръчката беше успешно анулирана!");
+        toast.success("Поръчката беше успешно анулирана!");
       } else {
-        alert("Възникна грешка при анулирането.");
+        toast.error("Възникна грешка при анулирането.");
       }
     } catch (err) {
       console.error(err);
@@ -220,11 +221,11 @@ export default function Dashboard() {
       if (res.ok && data.url) {
         window.location.href = data.url; 
       } else {
-        alert(data.error || "Възникна грешка при генерирането на линк за плащане.");
+        toast.error(data.error || "Възникна грешка при генерирането на линк за плащане.");
       }
     } catch (err) {
       console.error(err);
-      alert("Сървърна грешка.");
+      toast.error("Сървърна грешка.");
     }
   };
 
