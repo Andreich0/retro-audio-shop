@@ -156,15 +156,17 @@ export default function AdminUsersPage() {
                                 </td>
                                 <td className="p-4 md:p-5 text-right">
                                     <div className="flex justify-end gap-1.5 md:gap-2">
-                                        {/* 1. СМЯНА НА ПАРОЛА */}
-                                        <button 
-                                            onClick={() => handleResetPassword(user.user_id, user.first_name)}
-                                            className="p-1.5 md:p-2 border border-gray-600 text-gray-400 hover:text-[#ff6b00] hover:border-[#ff6b00] hover:bg-[#ff6b00]/10 rounded transition-all"
-                                            title="Смени парола"
-                                        >
-                                            <Key size={14} className="md:w-4 md:h-4" />
-                                        </button>
-
+                                        
+                                        {/* 1. СМЯНА НА ПАРОЛА (ЗАЩИТЕНА) */}
+                                        {(myRole === 'superadmin' || user.role !== 'superadmin') && (
+                                            <button 
+                                                onClick={() => handleResetPassword(user.user_id, user.first_name)}
+                                                className="p-1.5 md:p-2 border border-gray-600 text-gray-400 hover:text-[#ff6b00] hover:border-[#ff6b00] hover:bg-[#ff6b00]/10 rounded transition-all"
+                                                title="Смени парола"
+                                            >
+                                                <Key size={14} className="md:w-4 md:h-4" />
+                                            </button>
+                                        )}
                                         {/* 2. СМЯНА НА РОЛЯ */}
                                         {myRole === 'superadmin' && user.role !== 'superadmin' && (
                                             <button 

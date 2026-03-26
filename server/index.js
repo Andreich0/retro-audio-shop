@@ -641,11 +641,35 @@ app.put("/admin/users/:id/role", authorization, async (req, res) => {
 
 app.put("/admin/users/:id/password", authorization, async (req, res) => {
   try {
+    // 1. Вземаме ролята на човека, който прави заявката (ти)
+    const requester = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.user.user_id]);
+    const requesterRole = requester.rows[0].role;
+
+    if (requesterRole !== 'admin' && requesterRole !== 'superadmin') {
+      return res.status(403).json("Нямате права!");
+    }
+
+    // 2. Вземаме ролята на целевия потребител
+    const targetUser = await pool.query("SELECT role FROM users WHERE user_id = $1", [req.params.id]);
+    if (targetUser.rows.length === 0) return res.status(404).json("Потребителят не е намерен!");
+    
+    const targetRole = targetUser.rows[0].role;
+
+    // 3. 🛡️ ЗАЩИТАТА: Админ не може да пипа Суперадмин
+    if (requesterRole === 'admin' && targetRole === 'superadmin') {
+      return res.status(403).json("Нямате права да променяте паролата на Суперадмин!");
+    }
+
+    // 4. Смяна на паролата
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(req.body.newPassword, salt);
     await pool.query("UPDATE users SET password = $1 WHERE user_id = $2", [bcryptPassword, req.params.id]);
+    
     res.json("Паролата е променена!");
-  } catch (err) { res.status(500).send("Server Error"); }
+  } catch (err) { 
+    console.error(err.message);
+    res.status(500).send("Server Error"); 
+  }
 });
 
 // ==========================================
