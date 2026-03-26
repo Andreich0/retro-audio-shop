@@ -105,7 +105,14 @@ export default function Dashboard() {
     e.preventDefault();
     setPassMessage({ type: "", text: "" });
 
-    // ВАЛИДАЦИЯ: Проверка дали двете нови пароли съвпадат
+    // ВАЛИДАЦИЯ 1: Сила на паролата (мин. 8 символа, 1 буква, 1 цифра)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(passData.newPassword)) {
+        setPassMessage({ type: "error", text: "Новата парола трябва да е поне 8 символа (мин. 1 буква и 1 цифра)." });
+        return;
+    }
+
+    // ВАЛИДАЦИЯ 2: Проверка дали двете нови пароли съвпадат
     if (passData.newPassword !== passData.confirmPassword) {
         setPassMessage({ type: "error", text: "Новите пароли не съвпадат!" });
         return;
