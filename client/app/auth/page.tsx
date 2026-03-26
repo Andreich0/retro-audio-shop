@@ -91,13 +91,14 @@ function AuthContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 md:p-8 font-sans selection:bg-[#ff6b00] selection:text-black overflow-hidden relative">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 md:p-8 font-sans selection:bg-[#ff6b00] selection:text-black overflow-hidden relative z-0">
       
       {/* Декоративни светещи петна на фона */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#ff6b00]/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-gray-800/30 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="relative w-full max-w-5xl h-[850px] md:h-[650px] bg-[#0a0a0a] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden border border-[#222]">
+      {/* Контейнер на формата */}
+      <div className="relative z-10 w-full max-w-5xl h-[850px] md:h-[650px] bg-[#0a0a0a] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden border border-[#222]">
         
         {/* ================================================================= */}
         {/* --- ФОРМА ЗА ВХОД (Лява страна) --- */}
@@ -124,11 +125,9 @@ function AuthContent() {
               </div>
             </div>
 
+            {/* ПРОМЕНЕНА СЕКЦИЯ ЗА ПАРОЛАТА */}
             <div className="space-y-2">
-              <div className="flex justify-between items-end">
-                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest ml-1">Парола</label>
-                <Link href="/forgot-password" className="text-[9px] uppercase font-bold text-gray-500 hover:text-[#ff6b00] tracking-widest transition-colors mb-0.5">Забравена?</Link>
-              </div>
+              <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest ml-1 block">Парола</label>
               <div className="relative">
                 <Lock size={18} className="absolute left-4 top-4 text-gray-600" />
                 <input 
@@ -139,6 +138,11 @@ function AuthContent() {
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-500 hover:text-[#ff6b00] transition">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
+              </div>
+              <div className="flex justify-end pt-1 pr-1">
+                <Link href="/forgot-password" className="text-[9px] uppercase font-bold text-gray-500 hover:text-[#ff6b00] tracking-widest transition-colors">
+                  Забравена парола?
+                </Link>
               </div>
             </div>
 
@@ -219,7 +223,7 @@ function AuthContent() {
         {/* ================================================================= */}
         {/* --- ПЛЪЗГАЩ СЕ ПАНЕЛ (OVERLAY - Само Десктоп) --- */}
         {/* ================================================================= */}
-        <div className={`hidden md:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-[800ms] ease-in-out z-50 ${isSignUp ? "-translate-x-full" : "translate-x-0"}`}>
+        <div className={`hidden md:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-[800ms] ease-in-out z-30 ${isSignUp ? "-translate-x-full" : "translate-x-0"}`}>
           <div className={`bg-[#050505] relative w-[200%] h-full left-[-100%] transition-transform duration-[800ms] ease-in-out ${isSignUp ? "translate-x-1/2" : "translate-x-0"}`}>
             
             {/* ФОН СЪС СНИМКАТА И ЗАМЪГЛЯВАНЕ */}
