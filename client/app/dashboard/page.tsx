@@ -50,12 +50,15 @@ export default function Dashboard() {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [itemsLoading, setItemsLoading] = useState(false);
 
+  // --- PASSWORD MODAL STATES ---
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passData, setPassData] = useState({ oldPassword: "", newPassword: "" });
+  const [passData, setPassData] = useState({ oldPassword: "", newPassword: "", confirmPassword: "" });
   const [passMessage, setPassMessage] = useState({ type: "", text: "" });
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // --- PROFILE EDIT STATES ---
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: "", last_name: "", phone: "", city: "", address: ""
@@ -102,24 +105,38 @@ export default function Dashboard() {
     e.preventDefault();
     setPassMessage({ type: "", text: "" });
 
+    // ВАЛИДАЦИЯ: Проверка дали двете нови пароли съвпадат
+    if (passData.newPassword !== passData.confirmPassword) {
+        setPassMessage({ type: "error", text: "Новите пароли не съвпадат!" });
+        return;
+    }
+
     try {
         const token = localStorage.getItem("token");
+        
+        // Пращаме само oldPassword и newPassword към API-то
+        const payload = {
+            oldPassword: passData.oldPassword,
+            newPassword: passData.newPassword
+        };
+
         const res = await fetch(`${API_URL}/auth/change-password`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", token: token || "" },
-            body: JSON.stringify(passData)
+            body: JSON.stringify(payload)
         });
 
         const data = await res.json();
 
         if (res.ok) {
             setPassMessage({ type: "success", text: "Паролата е променена успешно!" });
-            setPassData({ oldPassword: "", newPassword: "" });
+            setPassData({ oldPassword: "", newPassword: "", confirmPassword: "" });
             setTimeout(() => {
                 setIsPasswordModalOpen(false);
                 setPassMessage({ type: "", text: "" });
                 setShowOldPassword(false);
                 setShowNewPassword(false);
+                setShowConfirmPassword(false);
             }, 2000); 
         } else {
             setPassMessage({ type: "error", text: data });
@@ -575,6 +592,8 @@ export default function Dashboard() {
                     setPassMessage({ type: "", text: "" }); 
                     setShowOldPassword(false);
                     setShowNewPassword(false);
+                    setShowConfirmPassword(false);
+                    setPassData({ oldPassword: "", newPassword: "", confirmPassword: "" });
                 }
             }}
         >
@@ -587,6 +606,8 @@ export default function Dashboard() {
                         setPassMessage({ type: "", text: "" }); 
                         setShowOldPassword(false);
                         setShowNewPassword(false);
+                        setShowConfirmPassword(false);
+                        setPassData({ oldPassword: "", newPassword: "", confirmPassword: "" });
                     }}
                     className="absolute top-3 right-3 md:top-4 md:right-4 text-gray-500 hover:text-white bg-[#18181b] hover:bg-gray-800 p-2 rounded-full transition-all border border-gray-800 hover:border-gray-600"
                 >
@@ -604,6 +625,7 @@ export default function Dashboard() {
                 </div>
 
                 <form onSubmit={handleChangePassword} className="space-y-4 md:space-y-5">
+                    {/* ПОЛЕ 1: Текуща парола */}
                     <div className="space-y-1.5">
                         <label className="block text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Текуща парола</label>
                         <div className="relative group">
@@ -628,6 +650,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
+                    {/* ПОЛЕ 2: Нова парола */}
                     <div className="space-y-1.5">
                         <label className="block text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Нова парола</label>
                         <div className="relative group">
@@ -648,6 +671,31 @@ export default function Dashboard() {
                                 className="absolute inset-y-0 right-0 pr-3 md:pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
                             >
                                 {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ПОЛЕ 3: Потвърждение на новата парола */}
+                    <div className="space-y-1.5">
+                        <label className="block text-[9px] md:text-[10px] uppercase font-bold text-gray-500 tracking-widest ml-1">Потвърди новата парола</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#ff6b00] transition-colors">
+                                <ShieldCheck size={16} />
+                            </div>
+                            <input 
+                                type={showConfirmPassword ? "text" : "password"}
+                                required
+                                placeholder="Повторете новата парола..."
+                                className="w-full bg-[#18181b] border border-gray-800 p-3.5 pl-10 md:pl-12 pr-10 rounded-xl text-white focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00] outline-none transition-all text-xs md:text-sm font-mono placeholder:font-sans placeholder:text-gray-600"
+                                value={passData.confirmPassword}
+                                onChange={(e) => setPassData({...passData, confirmPassword: e.target.value})}
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 md:pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
+                            >
+                                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
                     </div>
