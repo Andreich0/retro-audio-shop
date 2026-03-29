@@ -68,18 +68,27 @@ function AuthContent() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      // ПОПРАВКА: Сменихме /login на /register и loginData на registerData
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginData),
-    });
+        body: JSON.stringify(registerData),
+      });
+      
       const data = await res.json();
 
       if (res.ok) {
         toast.success("Успешна регистрация! Добре дошли.");
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        router.push("/dashboard");
+        
+        // Ако сървърът ти връща токен при регистрация:
+        if (data.token) {
+           login(data.token, data.role || "user");
+           setTimeout(() => router.push("/dashboard"), 100);
+        } else {
+           // Ако не връща токен, просто пращаме потребителя да се логне
+           setIsSignUp(false);
+           setLoginData({ email: registerData.email, password: registerData.password });
+        }
       } else {
         toast.error(data.message || "Грешка при регистрацията.");
       }
@@ -125,7 +134,6 @@ function AuthContent() {
               </div>
             </div>
 
-            {/* ПРОМЕНЕНА СЕКЦИЯ ЗА ПАРОЛАТА */}
             <div className="space-y-2">
               <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest ml-1 block">Парола</label>
               <div className="relative">

@@ -219,10 +219,27 @@ export default function ProductPage() {
               {product.name}
             </h1>
 
+            {/* ПРОМЕНЕНА СЕКЦИЯ ЗА ЦЕНАТА */}
             <div className="flex items-end gap-4 mb-8 border-b border-[#222] pb-8">
-                <div className={`text-5xl font-medium font-mono ${isOutOfStock ? 'text-gray-500 line-through decoration-[#ff6b00]' : 'text-white'}`}>
-                  {Number(product.price).toFixed(2)}<span className="text-2xl text-[#ff6b00] no-underline">€</span>
-                </div>
+                {isOutOfStock ? (
+                   <div className="flex flex-col">
+                       {/* Сива, малка, зачеркната оригинална цена */}
+                       <div className="text-gray-500 text-2xl font-mono relative w-fit">
+                           <span className="line-through decoration-[#ff6b00] decoration-2">
+                               {Number(product.price).toFixed(2)}
+                           </span>
+                           <span className="text-sm ml-1 text-gray-600">€</span>
+                       </div>
+                       {/* Голям надпис ИЗЧЕРПАНО */}
+                       <div className="text-3xl font-black text-red-500 uppercase tracking-widest mt-1">
+                           Изчерпано
+                       </div>
+                   </div>
+                ) : (
+                   <div className="text-5xl font-medium font-mono text-white">
+                      {Number(product.price).toFixed(2)}<span className="text-2xl text-[#ff6b00] no-underline">€</span>
+                   </div>
+                )}
                 
                 <div className="mb-2 ml-auto text-right">
                      <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Наличност</p>
@@ -230,7 +247,7 @@ export default function ProductPage() {
                         {!isOutOfStock ? (
                             <><Check size={14} /> В наличност ({product.stock})</>
                         ) : (
-                            <><XCircle size={14} /> Изчерпано</>
+                            <><XCircle size={14} /> Няма наличност</>
                         )}
                      </p>
                 </div>
