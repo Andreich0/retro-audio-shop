@@ -1,16 +1,16 @@
-const express = require("express");
-const app = express();
-const cors = require("cors");
-const pool = require("./db"); 
-const bcrypt = require("bcrypt");
+const express = require("express");//импортираме експрес, който ще ни служи за създаване на сървъра и рутовете
+const app = express();//основният експрес апликейшън, който ще ползваме за всички рутове
+const cors = require("cors");//за да може фронта да говори със сървъра
+const pool = require("./db"); // Връзка с базата данни
+const bcrypt = require("bcrypt"); //хеширане на пароли
 const jwt = require("jsonwebtoken");//пазене на потребителите
-const authorization = require("./middleware/authorization"); 
-const multer = require("multer");
-const fs = require("fs");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const path = require("path");
+const authorization = require("./middleware/authorization");//middleware за защита на рутове 
+const multer = require("multer");//за качване на снимки
+const fs = require("fs");//за работа с файловата система (изтриване на снимки при нужда)
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);//за плащания с карти (Stripe) - инициализираме Stripe с нашия секретен ключ от .env
+const path = require("path");//за работа с файлови пътища (особено при качване на снимки) 
 const rateLimit = require("express-rate-limit");//пакета за лимитиране
-require("dotenv").config();
+require("dotenv").config();//за да може да ползваме променливи от .env файла
 
 const PORT = process.env.PORT || 5000;
 
