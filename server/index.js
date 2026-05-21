@@ -3,14 +3,13 @@ const app = express();
 const cors = require("cors");
 const pool = require("./db"); 
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");//пазене на потребителите
 const authorization = require("./middleware/authorization"); 
 const multer = require("multer");
 const fs = require("fs");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const path = require("path");
-// ВАЖНО: Добавяме пакета за лимитиране
-const rateLimit = require("express-rate-limit");
+const rateLimit = require("express-rate-limit");//пакета за лимитиране
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
@@ -380,13 +379,13 @@ app.post("/orders", async (req, res) => {
         }
     }
 
-    await pool.query("BEGIN"); 
+    await pool.query("BEGIN"); //Row Locking
 
     let calculatedTotal = 0;
     const validItems = [];
 
     for (const item of items) {
-      const productRes = await pool.query("SELECT price, stock FROM products WHERE product_id = $1 FOR UPDATE", [item.product_id]);
+      const productRes = await pool.query("SELECT price, stock FROM products WHERE product_id = $1 FOR UPDATE", [item.product_id]); //tuk
       
       if (productRes.rows.length === 0) {
         throw new Error(`Продуктът не е намерен.`);
